@@ -91,9 +91,9 @@ def select_topic_node(pool: list, recent_topics: list) -> dict | None:
 
 
 def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dict, hooks: list) -> str:
-    """Claudeで投稿を生成"""
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    """GLMで投稿を生成"""
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
 
     hook_examples = "\n".join([f'- {h["example"]}' for h in hooks[:5]])
     feedback = analyst_report.get("feedback_text", "")
@@ -129,18 +129,18 @@ def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dic
 
 投稿本文のみを出力してください（前置き・説明不要）。"""
 
-    msg = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+    msg = client.chat.completions.create(
+        model="glm-4-flash",
         max_tokens=800,
         messages=[{"role": "user", "content": prompt}],
     )
-    return msg.content[0].text.strip()
+    return msg.choices[0].message.content.strip()
 
 
 def score_post(content: str, pattern: dict, account: dict) -> float:
-    """Claudeで投稿を10項目採点し、平均スコアを返す"""
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    """GLMで投稿を10項目採点し、平均スコアを返す"""
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
 
     dimensions_text = "\n".join([f"{i+1}. {d}" for i, d in enumerate(SCORE_DIMENSIONS)])
 
@@ -162,12 +162,12 @@ JSON形式で出力してください:
 {{"scores": [点数, 点数, ...（10個）], "average": 平均値, "feedback": "改善点を一言で"}}"""
 
     try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        msg = client.chat.completions.create(
+            model="glm-4-flash",
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = msg.content[0].text.strip()
+        text = msg.choices[0].message.content.strip()
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0].strip()
         elif "```" in text:

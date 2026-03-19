@@ -80,8 +80,8 @@ def run():
 
 
 def generate_feedback_with_claude(pattern_avg, topic_avg, top_patterns, avoid_patterns, top_topics, total) -> str:
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
 
     summary = f"""直近{total}件の投稿分析結果:
 
@@ -103,14 +103,14 @@ def generate_feedback_with_claude(pattern_avg, topic_avg, top_patterns, avoid_pa
 200字程度で具体的に書いてください。"""
 
     try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        msg = client.chat.completions.create(
+            model="glm-4-flash",
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
-        return msg.content[0].text.strip()
+        return msg.choices[0].message.content.strip()
     except Exception as e:
-        logger.error(f"Claude feedback generation failed: {e}")
+        logger.error(f"GLM feedback generation failed: {e}")
         return f"上位パターン: {top_patterns}。上位テーマ: {top_topics}。避けるパターン: {avoid_patterns}。"
 
 

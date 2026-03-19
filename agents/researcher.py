@@ -111,9 +111,9 @@ def _get_transcript(video_id: str) -> str:
 
 
 def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) -> str:
-    """Claudeでネタの要点を抽出"""
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    """GLMでネタの要点を抽出"""
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
     prompt = f"""以下のコンテンツから、Threads投稿のネタとして使えるポイントを3〜5個抽出してください。
 テーマ: {topic_name}（キーワード: {', '.join(keywords)}）
 
@@ -127,12 +127,12 @@ def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) ->
 ]
 """
     try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        msg = client.chat.completions.create(
+            model="glm-4-flash",
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = msg.content[0].text.strip()
+        text = msg.choices[0].message.content.strip()
         # JSONブロックを抽出
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0].strip()
@@ -141,7 +141,7 @@ def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) ->
         import json
         return json.loads(text)
     except Exception as e:
-        logger.error(f"Claude summarize failed: {e}")
+        logger.error(f"GLM summarize failed: {e}")
         return []
 
 

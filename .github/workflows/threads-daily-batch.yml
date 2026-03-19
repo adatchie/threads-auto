@@ -28,50 +28,50 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: threads-auto/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
-        run: pip install -r threads-auto/requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Supervisor check
-        working-directory: threads-auto/agents
+        working-directory: agents
         env:
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
         run: python supervisor.py --check
 
       - name: Fetcher (get metrics)
-        working-directory: threads-auto/agents
+        working-directory: agents
         env:
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
         run: python fetcher.py
 
       - name: Analyst
-        working-directory: threads-auto/agents
+        working-directory: agents
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
         run: python analyst.py
 
       - name: Researcher
-        working-directory: threads-auto/agents
+        working-directory: agents
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
           BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
         run: python researcher.py
 
       - name: Writer (generate 10 posts)
-        working-directory: threads-auto/agents
+        working-directory: agents
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
         run: python writer.py --count 10
 
       - name: Commit state changes
         run: |
           git config user.name "threads-bot"
           git config user.email "threads-bot@users.noreply.github.com"
-          git add threads-auto/state/
+          git add state/
           git diff --cached --quiet || git commit -m "chore: update state after daily batch [skip ci]"
           git push
