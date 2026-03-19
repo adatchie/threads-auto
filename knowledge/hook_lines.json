@@ -1,0 +1,25 @@
+{
+  "description": "バズった投稿の1行目パターン集。構造を転用する。",
+  "hooks": [
+    {"structure": "【事実】は嘘です。", "example": "「スキルないと転職できない」は嘘です。", "type": "rebuttal"},
+    {"structure": "【対象者】が【頻度/割合】で【意外な事実】。", "example": "転職者の67%が「もっと早く動けばよかった」と答えてる。", "type": "data_citation"},
+    {"structure": "【NG行動】、まじで知っておいてほしい。", "example": "転職活動でやってはいけないこと、まじで知っておいてほしい。", "type": "warning"},
+    {"structure": "【業界/サービス】が「本当は言いたくない」こと【N】つ。", "example": "転職エージェントが「本当は言いたくない」こと3つ。", "type": "expose"},
+    {"structure": "【テーマ】、需要あれば全部書きます。", "example": "「面接で絶対落ちない自己PR」の作り方、需要あれば全部書きます。", "type": "demand_check"},
+    {"structure": "【テーマ】、コメントに書いておきます。", "example": "転職エージェントに「この人は厳しい」と思われる人の特徴、コメントに書いておきます。", "type": "comment_inducing"},
+    {"structure": "【実績/変化】、やったことを全部書く。", "example": "転職活動3ヶ月で年収150万上げた、やったことを全部書く。", "type": "timeline"},
+    {"structure": "【テーマ】で成功する人と失敗する人、たった1つの違いがある。", "example": "転職で成功する人と失敗する人、たった1つの違いがある。", "type": "comparison"},
+    {"structure": "【共感できる悩み】", "example": "今の会社を辞めたいけど、次が決まってないと不安で動けない。", "type": "empathy"},
+    {"structure": "【断言】。", "example": "面接で落ちる人は、準備の方向が間違ってる。", "type": "assertion_short"},
+    {"structure": "【N回/年数】して気づいた、【学び】。", "example": "転職3回して気づいた、年収が上がる人と上がらない人の違い。", "type": "experience"},
+    {"structure": "【テーマ】が長引く人の特徴【N】つ。", "example": "転職活動が長引く人の特徴5つ。", "type": "list"},
+    {"structure": "実は【逆説/意外な事実】。", "example": "実は、転職で年収が上がらない人には共通のクセがある。", "type": "rebuttal"},
+    {"structure": "【テーマ】、全部書きます。", "example": "年収100万上げた転職術、全部書きます。", "type": "tree_expansion"},
+    {"structure": "【ターゲット】に言いたいことがある。", "example": "転職を迷ってる人に言いたいことがある。", "type": "assertion_short"},
+    {"structure": "知らないと損する【テーマ】の話。", "example": "知らないと損する、転職エージェントの使い方の話。", "type": "expose"},
+    {"structure": "【テーマ】について本音で話す。", "example": "転職エージェントについて本音で話す。", "type": "expose"},
+    {"structure": "【N年/N回】働いてわかったこと。", "example": "5年サラリーマンやってわかったこと。", "type": "experience"},
+    {"structure": "正直に言うと、【意外な本音/事実】。", "example": "正直に言うと、転職活動って運の要素もかなりある。", "type": "assertion_short"},
+    {"structure": "【テーマ】でよくある「間違い」3つ。", "example": "転職活動でよくある「間違い」3つ。", "type": "warning"}
+  ]
+}

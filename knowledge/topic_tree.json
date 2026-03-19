@@ -1,0 +1,55 @@
+{
+  "categories": [
+    {
+      "id": "job_prep",
+      "name": "転職準備",
+      "priority": 1,
+      "nodes": [
+        {"id": "resume_writing", "name": "職務経歴書の書き方", "keywords": ["職務経歴書 書き方", "職務経歴書 例文", "職歴書 コツ"], "priority": 1},
+        {"id": "timing", "name": "転職タイミング", "keywords": ["転職 タイミング", "転職 時期 いつ", "転職活動 始め方"], "priority": 2},
+        {"id": "portfolio", "name": "ポートフォリオ・スキルアップ", "keywords": ["転職 スキル", "転職 資格 必要", "転職 準備 何をする"], "priority": 3}
+      ]
+    },
+    {
+      "id": "interview",
+      "name": "面接攻略",
+      "priority": 2,
+      "nodes": [
+        {"id": "fail_reasons", "name": "面接で落ちる理由", "keywords": ["面接 落ちる 理由", "面接 不合格 原因", "面接 失敗 パターン"], "priority": 1},
+        {"id": "self_pr", "name": "自己PRの作り方", "keywords": ["自己PR 書き方", "自己PR 例文 転職", "自己PR 強み"], "priority": 2},
+        {"id": "interview_questions", "name": "よく出る面接質問", "keywords": ["面接 よく聞かれる 質問", "面接 志望動機", "転職理由 面接"], "priority": 3},
+        {"id": "first_impression", "name": "面接の第一印象", "keywords": ["面接 第一印象", "面接 服装", "面接 マナー"], "priority": 4}
+      ]
+    },
+    {
+      "id": "salary",
+      "name": "年収交渉",
+      "priority": 3,
+      "nodes": [
+        {"id": "salary_negotiation", "name": "年収交渉のやり方", "keywords": ["年収交渉 やり方", "給与交渉 コツ", "内定 年収 上げる"], "priority": 1},
+        {"id": "market_value", "name": "市場価値の調べ方", "keywords": ["転職 市場価値 調べ方", "自分の年収 適正", "転職 年収アップ"], "priority": 2},
+        {"id": "salary_mistakes", "name": "年収交渉の失敗パターン", "keywords": ["年収交渉 失敗", "給与交渉 NG", "年収 下がった 転職"], "priority": 3}
+      ]
+    },
+    {
+      "id": "agent_use",
+      "name": "転職エージェント活用",
+      "priority": 4,
+      "nodes": [
+        {"id": "agent_selection", "name": "エージェントの選び方", "keywords": ["転職エージェント 選び方", "転職エージェント おすすめ", "エージェント 比較"], "priority": 1},
+        {"id": "agent_pitfalls", "name": "エージェントの注意点", "keywords": ["転職エージェント デメリット", "転職エージェント 注意", "エージェント 騙される"], "priority": 2},
+        {"id": "agent_use_tips", "name": "エージェントをうまく使う方法", "keywords": ["転職エージェント 活用法", "エージェント 使い方", "転職エージェント 賢く使う"], "priority": 3}
+      ]
+    },
+    {
+      "id": "mindset",
+      "name": "転職マインド",
+      "priority": 5,
+      "nodes": [
+        {"id": "fear_of_change", "name": "転職への不安・怖さ", "keywords": ["転職 怖い", "転職 不安 解消", "転職 踏み出せない"], "priority": 1},
+        {"id": "regret", "name": "転職の後悔・失敗談", "keywords": ["転職 後悔", "転職 失敗", "転職 やめとけばよかった"], "priority": 2},
+        {"id": "success_stories", "name": "転職成功体験談", "keywords": ["転職 成功 体験", "転職してよかった", "転職 年収アップ 体験談"], "priority": 3}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "campaigns": [
+    {
+      "id": "mynavi_agent",
+      "name": "マイナビエージェント",
+      "asp": "afb",
+      "url": "REPLACE_WITH_AFB_URL",
+      "unit_price_note": "登録報酬",
+      "trigger_topics": ["agent_selection", "agent_use_tips", "job_prep"],
+      "frequency": 0.35,
+      "comment_text": "転職エージェント選びに迷ってるなら、マイナビエージェントは使いやすい。\n\n担当者との連絡が取りやすくて、20〜30代の転職サポートが手厚い。登録だけでもOK。\n\n▶ 無料登録はこちら👇\nREPLACE_WITH_AFB_URL\n\n※PR・登録・利用は完全無料です"
+    },
+    {
+      "id": "doda",
+      "name": "doda（デューダ）",
+      "asp": "afb",
+      "url": "REPLACE_WITH_AFB_URL",
+      "unit_price_note": "登録報酬 or 成果報酬",
+      "trigger_topics": ["agent_selection", "resume_writing", "interview_questions"],
+      "frequency": 0.25,
+      "comment_text": "エージェントと求人サイトを両方使いたい人には doda がいい。\n\n担当者がつくので、「どんな求人があるか見るだけ」でも使える。\n\n▶ 無料登録はこちら👇\nREPLACE_WITH_AFB_URL\n\n※PR・完全無料"
+    },
+    {
+      "id": "mynavi_tenshoku",
+      "name": "マイナビ転職",
+      "asp": "valuecommerce",
+      "url": "REPLACE_WITH_VC_URL",
+      "unit_price_note": "CPA（求人掲載側）or クリック報酬",
+      "trigger_topics": ["timing", "job_prep", "salary_negotiation"],
+      "frequency": 0.2,
+      "comment_text": "20代の転職でよく使われるのがマイナビ転職。\n\nUIが使いやすくて、スカウト機能もあるから登録しておくだけで声がかかることも。\n\n▶ 無料で求人を見てみる👇\nREPLACE_WITH_VC_URL\n\n※PR"
+    },
+    {
+      "id": "rikunabi_next",
+      "name": "リクナビNEXT",
+      "asp": "valuecommerce",
+      "url": "REPLACE_WITH_VC_URL",
+      "unit_price_note": "登録報酬",
+      "trigger_topics": ["timing", "portfolio", "market_value"],
+      "frequency": 0.2,
+      "comment_text": "転職したい気持ちはあるけど、まだ動けていない人は求人だけ見てみるといい。\n\nリクナビNEXTは「グッドポイント診断」で自分の強みもわかるから、自己PRの参考にもなる。\n\n▶ 無料で使ってみる👇\nREPLACE_WITH_VC_URL\n\n※PR"
+    },
+    {
+      "id": "bizreach",
+      "name": "ビズリーチ",
+      "asp": "afb",
+      "url": "REPLACE_WITH_AFB_URL",
+      "unit_price_note": "登録報酬",
+      "trigger_topics": ["salary_negotiation", "market_value", "agent_selection"],
+      "frequency": 0.15,
+      "comment_text": "年収600万以上を狙うなら、ビズリーチへの登録は必須。\n\nスカウトが来るから「どのくらいの企業から声がかかるか」で自分の市場価値がわかる。\n\n▶ 無料登録はこちら👇\nREPLACE_WITH_AFB_URL\n\n※PR"
+    }
+  ],
+  "rules": {
+    "max_affiliate_posts_per_day": 3,
+    "min_interval_between_affiliate_posts": 3,
+    "disclosure_required": true,
+    "disclosure_text": "※PR"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "patterns": [
+    {
+      "id": "assertion_short",
+      "name": "断言型_短文完結",
+      "description": "断言で始まり、短く完結する。共感・保存されやすい。",
+      "structure": "【断言1行目】\n\n【理由または補足 2〜4行】\n\n【締め一言】",
+      "example_hook": "面接で落ちる人は、準備の方向が間違ってる。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "comment_inducing",
+      "name": "コメント誘導型",
+      "description": "本文で問いかけ、コメント欄に続きや答えを置く。エンゲージメント高い。",
+      "structure": "【問いかけ or 衝撃の1行目】\n\n【少し焦らす本文】\n\n↓コメント欄に続き",
+      "example_hook": "転職エージェントに「この人は厳しい」と思われる人の特徴、コメントに書いておきます。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "tree_expansion",
+      "name": "ツリー展開型",
+      "description": "本文は短くして、返信で詳細を展開する。読者を引き込む。",
+      "structure": "【インパクトある1行目】\n\n【2〜3行の概要】\n\n（返信に続く）",
+      "example_hook": "年収100万上げた転職術、全部書きます。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "expose",
+      "name": "暴露系",
+      "description": "業界の裏側や知られていない事実を暴露する形式。拡散されやすい。",
+      "structure": "【「実は〜」「〜の真実」系1行目】\n\n【暴露内容 3〜5点】\n\n【締め】",
+      "example_hook": "転職エージェントが「本当は言いたくない」こと3つ。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "demand_check",
+      "name": "需要確認型",
+      "description": "「〇〇したい人いる？」「需要あれば書く」形式。エンゲージメント計測にも使える。",
+      "structure": "【需要確認の1行目】\n\n【内容の予告 2〜3行】\n\n【反応を促すCTA】",
+      "example_hook": "「面接で絶対落ちない自己PR」の作り方、需要あれば全部書きます。",
+      "affiliate_compatible": false
+    },
+    {
+      "id": "list",
+      "name": "リスト系",
+      "description": "〇〇な人の特徴N個、みたいな形式。保存・引用されやすい。",
+      "structure": "【リスト予告の1行目】\n\n① 〜\n② 〜\n③ 〜\n（以下続く）\n\n【締め】",
+      "example_hook": "転職活動が長引く人の特徴5つ。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "experience",
+      "name": "体験談風",
+      "description": "一人称の体験として書く形式。親近感・共感を生む。",
+      "structure": "【体験のフックとなる1行目】\n\n【エピソード 3〜5行】\n\n【学び・教訓】",
+      "example_hook": "転職3回して気づいた、年収が上がる人と上がらない人の違い。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "data_citation",
+      "name": "データ引用型",
+      "description": "統計・調査データを引用して信頼性を高める形式。",
+      "structure": "【データを使ったインパクトある1行目】\n\n【データの補足・解説】\n\n【読者へのメッセージ】",
+      "example_hook": "転職者の67%が「もっと早く動けばよかった」と答えてる。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "rebuttal",
+      "name": "反論型",
+      "description": "「実は逆」「その常識は間違い」形式。意外性で読まれる。",
+      "structure": "【「実は〜」「逆に〜」の1行目】\n\n【反論の根拠】\n\n【正しい考え方】",
+      "example_hook": "「スキルがないと転職できない」は嘘です。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "empathy",
+      "name": "共感型",
+      "description": "読者の悩みや気持ちに共感してから解決策へ。心理的距離を縮める。",
+      "structure": "【読者の悩みをそのまま言語化した1行目】\n\n【共感と寄り添い】\n\n【具体的な解決策 or 視点の転換】",
+      "example_hook": "今の会社を辞めたいけど、次が決まってないと不安で動けない。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "warning",
+      "name": "警告型",
+      "description": "「これをやると失敗する」「注意して」形式。損失回避心理を刺激。",
+      "structure": "【警告の1行目】\n\n【失敗パターン 2〜3点】\n\n【正しい方法 or 締め】",
+      "example_hook": "転職活動でやってはいけないこと、まじで知っておいてほしい。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "comparison",
+      "name": "比較型",
+      "description": "「〇〇な人 vs △△な人」形式で対比させる。違いが明確で読まれやすい。",
+      "structure": "【対比の1行目】\n\n✅ 〇〇な人は〜\n❌ △△な人は〜\n\n【締めのメッセージ】",
+      "example_hook": "転職で成功する人と失敗する人、たった1つの違いがある。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "timeline",
+      "name": "時系列型",
+      "description": "「〇ヶ月でどう変わったか」「ステップ解説」形式。ロードマップとして保存される。",
+      "structure": "【変化や期間を示す1行目】\n\nSTEP1: 〜\nSTEP2: 〜\nSTEP3: 〜\n\n【まとめ】",
+      "example_hook": "転職活動3ヶ月で年収150万上げた、やったことを全部書く。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "buzz_pivot",
+      "name": "バズピボット型",
+      "description": "バズった投稿の続編・関連投稿。既存のファンに向けて展開する。",
+      "structure": "【「続きです」「反響があったので」系の1行目】\n\n【前回の要点 1行】\n\n【今回の新情報 3〜5行】",
+      "example_hook": "先日の投稿に「もっと聞きたい」って声が多かったので補足します。",
+      "affiliate_compatible": true
+    },
+    {
+      "id": "affiliate_lead",
+      "name": "アフィリエイト誘導型",
+      "description": "有益情報を提供しながら自然にサービス紹介につなげる。コメント欄にリンク配置。",
+      "structure": "【有益情報の1行目（直接宣伝感なし）】\n\n【有益な本文 3〜5行】\n\n【「詳しくはコメントで」と誘導】",
+      "example_hook": "転職エージェント、どこを使うかで結果が全然違う。",
+      "affiliate_compatible": true
+    }
+  ]
+}

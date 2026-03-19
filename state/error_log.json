@@ -1,0 +1,8 @@
+[
+  {
+    "timestamp": "2026-03-19T22:10:04.820320+09:00",
+    "agent": "poster",
+    "message": "Post failed",
+    "detail": "HTTPSConnectionPool(host='graph.threads.net', port=443): Max retries exceeded with url: /v1.0/26574021808888786/threads (Caused by ProxyError('Unable to connect to proxy', OSError('Tunnel connection failed: 403 Forbidden')))"
+  }
+]
