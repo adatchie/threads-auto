@@ -4,5 +4,11 @@
     "agent": "poster",
     "message": "Post failed",
     "detail": "HTTPSConnectionPool(host='graph.threads.net', port=443): Max retries exceeded with url: /v1.0/26574021808888786/threads (Caused by ProxyError('Unable to connect to proxy', OSError('Tunnel connection failed: 403 Forbidden')))"
+  },
+  {
+    "timestamp": "2026-03-19T23:54:30.034389+09:00",
+    "agent": "poster",
+    "message": "Post failed",
+    "detail": "Container creation failed: 400 {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 19-Mar-26 03:00:00 PDT. The current time is Thursday, 19-Mar-26 07:54:29 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":0,\"fbtrace_id\":\"A0X_g8QaqIZT1xUOAgTZkYi\"}}"
   }
 ]
