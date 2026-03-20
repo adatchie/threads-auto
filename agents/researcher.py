@@ -59,7 +59,7 @@ def brave_search(query: str, count: int = 5) -> list[dict]:
         return []
     url = "https://api.search.brave.com/res/v1/web/search"
     headers = {"Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY}
-    params = {"q": query, "count": count, "country": "JP", "search_lang": "ja"}
+    params = {"q": query, "count": count}
     try:
         resp = requests.get(url, headers=headers, params=params, timeout=10)
         resp.raise_for_status()
