@@ -286,12 +286,6 @@ def run(count: int = 10):
 
     save_json(STATE_DIR / "post_queue.json", queue)
     save_json(STATE_DIR / "research_pool.json", pool)
-        # Discord通知
-        try:
-            from discord_notify import send_post_preview
-            send_post_preview(queue_item)
-        except Exception as e:
-            logger.warning(f"Discord通知失敗: {e}")
 
     logger.info(f"Writer done. Generated: {generated}, Rejected: {rejected}")
 
