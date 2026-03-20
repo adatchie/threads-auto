@@ -64,5 +64,11 @@
     "agent": "poster",
     "message": "Post failed",
     "detail": "Container creation failed: 400 {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 19-Mar-26 03:00:00 PDT. The current time is Thursday, 19-Mar-26 21:52:50 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":0,\"fbtrace_id\":\"AUVltF-rl4lGW92YEhWK1Ml\"}}"
+  },
+  {
+    "timestamp": "2026-03-20T14:56:56.594079+09:00",
+    "agent": "poster",
+    "message": "Post failed",
+    "detail": "Container creation failed: 400 {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 19-Mar-26 03:00:00 PDT. The current time is Thursday, 19-Mar-26 22:56:56 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":0,\"fbtrace_id\":\"AA9db9M5L4aN-k-Oukcdjpj\"}}"
   }
 ]
