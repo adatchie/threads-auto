@@ -110,40 +110,34 @@ def _get_transcript(video_id: str) -> str:
         return ""
 
 
-def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) -> str:
-    """GLMでネタの要点を抽出"""
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
+def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) -> list:
+    """Anthropicでネタの要点を抽出"""
+    import anthropic, json
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     prompt = f"""以下のコンテンツから、Threads投稿のネタとして使えるポイントを3〜5個抽出してください。
 テーマ: {topic_name}（キーワード: {', '.join(keywords)}）
-
 コンテンツ:
 {content[:3000]}
-
-出力形式（JSON配列）:
+出力形式（JSON配列のみ）:
 [
   {{"point": "ネタのポイント", "detail": "詳細や具体例", "hook_potential": "高/中/低"}},
   ...
-]
-"""
+]"""
     try:
-        msg = client.chat.completions.create(
-            model="glm-4-flash",
+        msg = client.messages.create(
+            model="claude-haiku-4-5-20251001",
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = msg.choices[0].message.content.strip()
-        # JSONブロックを抽出
+        text = msg.content[0].text.strip()
         if "```json" in text:
             text = text.split("```json")[1].split("```")[0].strip()
         elif "```" in text:
             text = text.split("```")[1].split("```")[0].strip()
-        import json
         return json.loads(text)
     except Exception as e:
-        logger.error(f"GLM summarize failed: {e}")
+        logger.error(f"Anthropic summarize failed: {e}")
         return []
-
 
 def run(max_nodes: int = 3):
     logger.info("Researcher started")
