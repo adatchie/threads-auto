@@ -14,6 +14,7 @@ logger = logging.getLogger("writer")
 
 JST = timezone(timedelta(hours=9))
 MAX_RETRIES = 2
+REVIEW_HOURS = 2  # Discord確認猶予時間（時間）
 MIN_QUALITY_SCORE = 7.0
 MAX_SIMILARITY = 0.85
 RECENT_PATTERN_WINDOW = 3  # 直近N件で同パターン禁止
@@ -256,6 +257,7 @@ def run(count: int = 10):
 
         # キューに追加
         post_id = f"post_{uuid.uuid4().hex[:8]}"
+        review_until = (datetime.now(JST) + timedelta(hours=REVIEW_HOURS)).isoformat()
         queue_item = {
             "id": post_id,
             "content": content,
@@ -265,6 +267,7 @@ def run(count: int = 10):
             "has_affiliate": affiliate_campaign is not None,
             "affiliate_campaign_id": affiliate_campaign["id"] if affiliate_campaign else None,
             "status": "pending",
+            "review_until": review_until,
             "created_at": now_jst(),
             "scheduled_slot": None,  # Posterが設定
         }
@@ -283,6 +286,13 @@ def run(count: int = 10):
 
     save_json(STATE_DIR / "post_queue.json", queue)
     save_json(STATE_DIR / "research_pool.json", pool)
+        # Discord通知
+        try:
+            from discord_notify import send_post_preview
+            send_post_preview(queue_item)
+        except Exception as e:
+            logger.warning(f"Discord通知失敗: {e}")
+
     logger.info(f"Writer done. Generated: {generated}, Rejected: {rejected}")
 
 
