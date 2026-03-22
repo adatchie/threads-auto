@@ -8,7 +8,7 @@
     "detail": "採用担当者は1枚あたり数十秒しか見ない。冗長な背景説明は削り、実績は箇条書き+数字で。dodaの調査でも「A4で2枚」が最適とされている。",
     "hook_potential": "中",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_resume_writing_2026-03-22_1",
@@ -19,7 +19,7 @@
     "detail": "企業ごとに求めるスキル・経験は異なる。応募先に合わせて強調ポイントを変えるだけで通過率が変わる。type転職の調査で「書き方で損している人が多い」と指摘。",
     "hook_potential": "高",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_resume_writing_2026-03-22_2",
@@ -30,7 +30,7 @@
     "detail": "「売上に貢献」ではなく「前年比120%達成」「チーム5名のリーダーとして月間KPI達成率95%」のように数字で語る。面接での質問材料にもなるため、自分で説明できる数字を選ぶのがコツ。",
     "hook_potential": "高",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_fail_reasons_2026-03-22_3",
@@ -41,7 +41,7 @@
     "detail": "マイナビ転職の調査で、一次面接では「清潔感」「挨拶」「目を合わせるか」など非言語コミュニケーションが最重視される。スキルは二次以降で見るため、一次で落ちる人はスキル不足ではなく印象の問題。",
     "hook_potential": "高",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_fail_reasons_2026-03-22_4",
@@ -52,7 +52,7 @@
     "detail": "最終面接まで進んだ段階で油断し、志望動機の一貫性が崩れたり、入社後のビジョンが曖昧になるケース。リクルートエージェントの分析では最終面接の通過率は約50%で、決して「ほぼ合格」ではない。",
     "hook_potential": "高",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_fail_reasons_2026-03-22_5",
@@ -63,7 +63,7 @@
     "detail": "スキルが十分でも「うちの社風に合わない」で落ちるケースが多い。JACリクルートメントによれば、面接官は「この人と一緒に働きたいか」を無意識に判断している。企業HPの理念やSNSで社風を事前に調べることが対策。",
     "hook_potential": "中",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_salary_negotiation_2026-03-22_6",
@@ -74,7 +74,7 @@
     "detail": "マイナビキャリアリサーチLabの調査で、中途入社者からの年収交渉に対して半数以上の企業が「上げる余地があった」と回答。交渉しないこと自体が機会損失。",
     "hook_potential": "高",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_salary_negotiation_2026-03-22_7",
@@ -85,7 +85,7 @@
     "detail": "内定前に切り出すと印象悪化、承諾書提出後は変更不可。オファー面談があればそのタイミングが最適。LHH転職エージェントやdodaが共通して推奨するポイント。",
     "hook_potential": "高",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_salary_negotiation_2026-03-22_8",
@@ -96,7 +96,7 @@
     "detail": "経験者であれば5〜10%アップが現実的なライン。未経験のキャリアチェンジでは逆に70〜80%に下がる傾向。相場を知らずに高すぎる額を要求するのが失敗の典型パターン。",
     "hook_potential": "中",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_salary_negotiation_2026-03-22_9",
@@ -107,6 +107,6 @@
     "detail": "「他社から年収500万で内定をいただいている」と伝えることで交渉力が上がる。ただし嘘はNGで、実際に複数社受けて内定を得てから使うのが鉄則。",
     "hook_potential": "中",
     "collected_at": "2026-03-22T16:30:00+09:00",
-    "used": false
+    "used": true
   }
 ]
