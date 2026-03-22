@@ -61,8 +61,10 @@ def brave_search(query: str, count: int = 5) -> list[dict]:
     url = "https://api.search.brave.com/res/v1/web/search"
     headers = {"Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY}
     params = {"q": query, "count": count}
-    for attempt, wait in enumerate([0, 10, 30]):
+    waits = [0, 60, 120]
+    for attempt, wait in enumerate(waits):
         if wait:
+            logger.info(f"Brave search waiting {wait}s before retry...")
             time.sleep(wait)
         try:
             resp = requests.get(url, headers=headers, params=params, timeout=10)
@@ -70,14 +72,17 @@ def brave_search(query: str, count: int = 5) -> list[dict]:
                 results = resp.json().get("web", {}).get("results", [])
                 return [{"title": r["title"], "url": r["url"], "description": r.get("description", "")} for r in results]
             elif resp.status_code == 429:
-                logger.warning(f"Brave search rate limited (attempt {attempt + 1}/3)")
+                retry_after = int(resp.headers.get("Retry-After", waits[min(attempt + 1, len(waits) - 1)]))
+                logger.warning(f"Brave search rate limited (attempt {attempt + 1}/{len(waits)}, retry-after={retry_after}s)")
+                if attempt < len(waits) - 1:
+                    waits[attempt + 1] = max(waits[attempt + 1], retry_after)
             else:
                 logger.error(f"Brave search failed: {resp.status_code}")
                 return []
         except Exception as e:
             logger.error(f"Brave search error: {e}")
             return []
-    logger.error("Brave search gave up after 3 retries (429)")
+    logger.error(f"Brave search gave up after {len(waits)} retries (429)")
     return []
 
 
@@ -164,12 +169,12 @@ def run(max_nodes: int = 3):
         logger.info(f"Researching node: {node['name']} (recent count: {node['count']})")
         collected_text = ""
 
-        # Web検索（リクエスト間に1秒待機）
+        # Web検索（リクエスト間に5秒待機）
         for kw in node["keywords"][:2]:
             results = brave_search(kw)
             for r in results:
                 collected_text += f"\n{r['title']}\n{r['description']}\n"
-            time.sleep(1)
+            time.sleep(5)
 
         # YouTube検索
         for kw in node["keywords"][:1]:
