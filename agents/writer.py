@@ -184,6 +184,7 @@ def run(count: int = 10):
 
     generated = 0
     rejected = 0
+    debug_log = []  # デバッグ情報
 
     for _ in range(count * 3):  # 上限を設けてループ
         if generated >= count:
@@ -220,8 +221,11 @@ def run(count: int = 10):
         for attempt in range(MAX_RETRIES + 1):
             try:
                 candidate = generate_post(pattern, topic, account, analyst_report, hooks)
+                debug_entry = {"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "content_len": len(candidate), "content_preview": candidate[:200]}
+                debug_log.append(debug_entry)
                 logger.info(f"  Generated content length: {len(candidate)} chars, first 50: {repr(candidate[:50])}")
                 if not candidate or len(candidate.strip()) < 20:
+                    debug_entry["status"] = "empty_content"
                     logger.warning(f"  Empty or too short content, skipping")
                     continue
                 score = score_post(candidate, pattern, account)
@@ -282,6 +286,12 @@ def run(count: int = 10):
 
     save_json(STATE_DIR / "post_queue.json", queue)
     save_json(STATE_DIR / "research_pool.json", pool)
+    save_json(STATE_DIR / "writer_debug.json", {
+        "run_at": now_jst(),
+        "generated": generated,
+        "rejected": rejected,
+        "debug_log": debug_log,
+    })
 
     logger.info(f"Writer done. Generated: {generated}, Rejected: {rejected}")
 

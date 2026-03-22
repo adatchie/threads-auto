@@ -52,9 +52,9 @@ jobs:
       - name: Researcher
         working-directory: agents
         run: python researcher.py
-      - name: Writer (generate 10 posts)
+      - name: Writer (generate 3 posts - debug)
         working-directory: agents
-        run: python writer.py --count 10
+        run: python writer.py --count 3
       - name: Commit state changes
         run: |
           git config user.name "threads-bot"
