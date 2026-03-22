@@ -126,10 +126,29 @@ def _get_transcript(video_id: str) -> str:
         return ""
 
 
+def _call_claude(prompt: str, max_tokens: int = 1024) -> str:
+    """Claude APIを呼び出してテキストを返す共通ヘルパー"""
+    import anthropic
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    msg = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return msg.content[0].text.strip()
+
+
+def _parse_json_points(text: str) -> list:
+    import json
+    if "```json" in text:
+        text = text.split("```json")[1].split("```")[0].strip()
+    elif "```" in text:
+        text = text.split("```")[1].split("```")[0].strip()
+    return json.loads(text)
+
+
 def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) -> list:
     """Anthropicでネタの要点を抽出"""
-    import anthropic, json
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     prompt = f"""以下のコンテンツから、Threads投稿のネタとして使えるポイントを3〜5個抽出してください。
 テーマ: {topic_name}（キーワード: {', '.join(keywords)}）
 コンテンツ:
@@ -140,20 +159,41 @@ def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) ->
   ...
 ]"""
     try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = msg.content[0].text.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-        return json.loads(text)
+        text = _call_claude(prompt)
+        return _parse_json_points(text)
     except Exception as e:
         logger.error(f"Anthropic summarize failed: {e}")
         return []
+
+
+def research_with_claude_only(topic_name: str, keywords: list[str]) -> list:
+    """外部検索が使えない場合にClaudeの知識でネタを生成するフォールバック"""
+    logger.info(f"Falling back to Claude-only research for: {topic_name}")
+    prompt = f"""あなたは日本のキャリア・転職領域に詳しいコンテンツライターです。
+外部検索なしに、あなたの知識から以下のテーマのThreads投稿ネタを5個生成してください。
+
+テーマ: {topic_name}
+キーワード: {', '.join(keywords)}
+
+条件:
+- 日本のビジネスパーソンが共感・参考にできる具体的な内容
+- 「あるある」「意外な事実」「すぐ使えるコツ」などフック力の高いもの
+- 各ポイントは独立して投稿として成立する内容
+
+出力形式（JSON配列のみ）:
+[
+  {{"point": "ネタのポイント", "detail": "詳細や具体例（100字程度）", "hook_potential": "高/中/低"}},
+  ...
+]"""
+    try:
+        text = _call_claude(prompt, max_tokens=1500)
+        points = _parse_json_points(text)
+        logger.info(f"Claude-only research generated {len(points)} points for: {topic_name}")
+        return points
+    except Exception as e:
+        logger.error(f"Claude-only research failed: {e}")
+        return []
+
 
 def run(max_nodes: int = 3):
     logger.info("Researcher started")
@@ -183,10 +223,12 @@ def run(max_nodes: int = 3):
                 collected_text += f"\n{r['title']}\n{r['transcript']}\n"
 
         if not collected_text.strip():
-            logger.warning(f"No content found for node: {node['name']}")
-            continue
+            # 外部検索が全滅した場合はClaudeの知識で直接生成
+            logger.warning(f"No content from external search for: {node['name']}, using Claude fallback")
+            points = research_with_claude_only(node["name"], node["keywords"])
+        else:
+            points = summarize_with_claude(collected_text, node["name"], node["keywords"])
 
-        points = summarize_with_claude(collected_text, node["name"], node["keywords"])
         if not points:
             continue
 
