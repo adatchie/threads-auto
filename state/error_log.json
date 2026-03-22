@@ -124,5 +124,185 @@
     "agent": "poster",
     "message": "Post failed",
     "detail": "Container creation failed: 400 {\"error\":{\"message\":\"Error validating access token: Session has expired on Thursday, 19-Mar-26 03:00:00 PDT. The current time is Friday, 20-Mar-26 09:56:11 PDT.\",\"type\":\"OAuthException\",\"code\":190,\"error_subcode\":0,\"fbtrace_id\":\"AC--CsWKHNxdSpM7WHwZb4e\"}}"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.052999+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.128126+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.203702+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.278037+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.350111+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.426448+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.499835+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.582373+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.661713+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.734218+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.815373+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:03.904742+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.098822+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.175848+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.255348+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.332263+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.448861+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.526277+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.599667+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.682360+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:04.754649+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.014640+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.091782+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.167021+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.244592+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.322002+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.398841+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.514941+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.593523+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
+  },
+  {
+    "timestamp": "2026-03-23T01:57:05.667074+09:00",
+    "agent": "writer",
+    "message": "Post generation failed",
+    "detail": "401 Client Error: Unauthorized for url: https://api.anthropic.com/v1/messages"
   }
 ]
