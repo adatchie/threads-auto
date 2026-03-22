@@ -26,17 +26,25 @@ def call_llm(prompt: str, max_tokens: int = 1024) -> str:
         raise RuntimeError("LLM APIキーが未設定です（ANTHROPIC_API_KEY / GEMINI_API_KEY / GLM_API_KEY のいずれかを設定してください）")
 
     last_error = None
+    _last_backend = None
     for name, fn in backends:
         try:
             logger.info(f"Trying LLM backend: {name}")
             result = fn(prompt, max_tokens)
+            if not result or not result.strip():
+                logger.warning(f"LLM backend {name}: returned empty content, trying next")
+                last_error = ValueError(f"{name} returned empty content")
+                continue
             logger.info(f"LLM backend {name}: success (len={len(result)})")
+            call_llm._last_backend = name
             return result
         except Exception as e:
             logger.warning(f"LLM backend {name} failed: {e}")
             last_error = e
 
     raise RuntimeError(f"全LLMバックエンドが失敗しました。最後のエラー: {last_error}")
+
+call_llm._last_backend = None  # 最後に使用したバックエンド名を記録
 
 
 def _call_anthropic(prompt: str, max_tokens: int) -> str:

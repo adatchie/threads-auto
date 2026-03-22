@@ -221,7 +221,8 @@ def run(count: int = 10):
         for attempt in range(MAX_RETRIES + 1):
             try:
                 candidate = generate_post(pattern, topic, account, analyst_report, hooks)
-                debug_entry = {"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "content_len": len(candidate), "content_preview": candidate[:200]}
+                from llm import call_llm as _clm
+                debug_entry = {"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "content_len": len(candidate), "content_preview": candidate[:200], "backend": getattr(_clm, '_last_backend', 'unknown')}
                 debug_log.append(debug_entry)
                 logger.info(f"  Generated content length: {len(candidate)} chars, first 50: {repr(candidate[:50])}")
                 if not candidate or len(candidate.strip()) < 20:
@@ -243,6 +244,7 @@ def run(count: int = 10):
                 else:
                     logger.info(f"  Score too low ({score:.1f} < {MIN_QUALITY_SCORE}), retrying...")
             except Exception as e:
+                debug_log.append({"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "error": str(e)[:200]})
                 log_error("writer", f"Post generation failed", str(e))
                 break
 
