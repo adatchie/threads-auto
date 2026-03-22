@@ -2,6 +2,7 @@
 リサーチャー: テーマツリーを見て不足ノードを特定し、YouTube/Web/Xからネタを収集する
 """
 import os
+import json
 import logging
 import time
 import requests
@@ -14,6 +15,35 @@ logger = logging.getLogger("researcher")
 BRAVE_API_KEY = os.getenv("BRAVE_SEARCH_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 JST = timezone(timedelta(hours=9))
+
+# 検索キャッシュ: 同じキーワードを7日間は再検索しない
+SEARCH_CACHE_FILE = STATE_DIR / "search_cache.json"
+CACHE_TTL_DAYS = 7
+
+
+def _load_cache() -> dict:
+    try:
+        return load_json(SEARCH_CACHE_FILE)
+    except Exception:
+        return {}
+
+
+def _save_cache(cache: dict):
+    save_json(SEARCH_CACHE_FILE, cache)
+
+
+def _cache_get(cache: dict, query: str) -> list | None:
+    entry = cache.get(query)
+    if not entry:
+        return None
+    cached_at = datetime.fromisoformat(entry["cached_at"])
+    if datetime.now(JST) - cached_at > timedelta(days=CACHE_TTL_DAYS):
+        return None
+    return entry["results"]
+
+
+def _cache_set(cache: dict, query: str, results: list):
+    cache[query] = {"cached_at": now_jst(), "results": results}
 
 
 def get_recent_topic_counts(history: list, days: int = 14) -> Counter:
@@ -49,40 +79,55 @@ def find_underrepresented_nodes(topic_tree: dict, counts: Counter) -> list:
                 "count": counts.get(nid, 0),
                 "priority": node.get("priority", 99),
             })
-    # 出現回数が少ない順、同じなら優先度順
     return sorted(nodes, key=lambda n: (n["count"], n["priority"]))
 
 
-def brave_search(query: str, count: int = 5) -> list[dict]:
-    """Brave Search APIでウェブ検索。429時はリトライ。"""
+def brave_search(query: str, cache: dict, count: int = 5) -> list[dict]:
+    """Brave Search APIでウェブ検索。キャッシュヒット時はAPIを叩かない。"""
+    # キャッシュ確認
+    cached = _cache_get(cache, query)
+    if cached is not None:
+        logger.info(f"Brave search cache hit: {query}")
+        return cached
+
     if not BRAVE_API_KEY:
         logger.warning("BRAVE_SEARCH_API_KEY not set")
         return []
+
     url = "https://api.search.brave.com/res/v1/web/search"
     headers = {"Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY}
     params = {"q": query, "count": count}
-    waits = [0, 60, 120]
-    for attempt, wait in enumerate(waits):
-        if wait:
-            logger.info(f"Brave search waiting {wait}s before retry...")
-            time.sleep(wait)
+
+    for attempt in range(3):
         try:
             resp = requests.get(url, headers=headers, params=params, timeout=10)
+
+            # クォータ状況をログ出力
+            remaining = resp.headers.get("X-RateLimit-Remaining") or resp.headers.get("X-Quota-Remaining")
+            if remaining is not None:
+                logger.info(f"Brave quota remaining: {remaining}")
+
             if resp.status_code == 200:
                 results = resp.json().get("web", {}).get("results", [])
-                return [{"title": r["title"], "url": r["url"], "description": r.get("description", "")} for r in results]
+                data = [{"title": r["title"], "url": r["url"], "description": r.get("description", "")} for r in results]
+                _cache_set(cache, query, data)
+                return data
+
             elif resp.status_code == 429:
-                retry_after = int(resp.headers.get("Retry-After", waits[min(attempt + 1, len(waits) - 1)]))
-                logger.warning(f"Brave search rate limited (attempt {attempt + 1}/{len(waits)}, retry-after={retry_after}s)")
-                if attempt < len(waits) - 1:
-                    waits[attempt + 1] = max(waits[attempt + 1], retry_after)
+                retry_after = int(resp.headers.get("Retry-After", 60))
+                logger.warning(f"Brave rate limited (attempt {attempt + 1}/3, retry-after={retry_after}s)")
+                if attempt < 2:
+                    logger.info(f"Waiting {retry_after}s...")
+                    time.sleep(retry_after)
             else:
-                logger.error(f"Brave search failed: {resp.status_code}")
+                logger.error(f"Brave search HTTP {resp.status_code}: {resp.text[:200]}")
                 return []
+
         except Exception as e:
             logger.error(f"Brave search error: {e}")
             return []
-    logger.error(f"Brave search gave up after {len(waits)} retries (429)")
+
+    logger.error("Brave search gave up after 3 retries (429) — クォータ枯渇の可能性あり")
     return []
 
 
@@ -126,29 +171,10 @@ def _get_transcript(video_id: str) -> str:
         return ""
 
 
-def _call_claude(prompt: str, max_tokens: int = 1024) -> str:
-    """Claude APIを呼び出してテキストを返す共通ヘルパー"""
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    msg = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=max_tokens,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.content[0].text.strip()
-
-
-def _parse_json_points(text: str) -> list:
-    import json
-    if "```json" in text:
-        text = text.split("```json")[1].split("```")[0].strip()
-    elif "```" in text:
-        text = text.split("```")[1].split("```")[0].strip()
-    return json.loads(text)
-
-
 def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) -> list:
     """Anthropicでネタの要点を抽出"""
+    import anthropic
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     prompt = f"""以下のコンテンツから、Threads投稿のネタとして使えるポイントを3〜5個抽出してください。
 テーマ: {topic_name}（キーワード: {', '.join(keywords)}）
 コンテンツ:
@@ -159,39 +185,19 @@ def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) ->
   ...
 ]"""
     try:
-        text = _call_claude(prompt)
-        return _parse_json_points(text)
+        msg = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = msg.content[0].text.strip()
+        if "```json" in text:
+            text = text.split("```json")[1].split("```")[0].strip()
+        elif "```" in text:
+            text = text.split("```")[1].split("```")[0].strip()
+        return json.loads(text)
     except Exception as e:
         logger.error(f"Anthropic summarize failed: {e}")
-        return []
-
-
-def research_with_claude_only(topic_name: str, keywords: list[str]) -> list:
-    """外部検索が使えない場合にClaudeの知識でネタを生成するフォールバック"""
-    logger.info(f"Falling back to Claude-only research for: {topic_name}")
-    prompt = f"""あなたは日本のキャリア・転職領域に詳しいコンテンツライターです。
-外部検索なしに、あなたの知識から以下のテーマのThreads投稿ネタを5個生成してください。
-
-テーマ: {topic_name}
-キーワード: {', '.join(keywords)}
-
-条件:
-- 日本のビジネスパーソンが共感・参考にできる具体的な内容
-- 「あるある」「意外な事実」「すぐ使えるコツ」などフック力の高いもの
-- 各ポイントは独立して投稿として成立する内容
-
-出力形式（JSON配列のみ）:
-[
-  {{"point": "ネタのポイント", "detail": "詳細や具体例（100字程度）", "hook_potential": "高/中/低"}},
-  ...
-]"""
-    try:
-        text = _call_claude(prompt, max_tokens=1500)
-        points = _parse_json_points(text)
-        logger.info(f"Claude-only research generated {len(points)} points for: {topic_name}")
-        return points
-    except Exception as e:
-        logger.error(f"Claude-only research failed: {e}")
         return []
 
 
@@ -200,6 +206,7 @@ def run(max_nodes: int = 3):
     history = load_json(STATE_DIR / "post_history.json")
     topic_tree = load_json(KNOWLEDGE_DIR / "topic_tree.json")
     pool = load_json(STATE_DIR / "research_pool.json")
+    cache = _load_cache()
 
     counts = get_recent_topic_counts(history)
     target_nodes = find_underrepresented_nodes(topic_tree, counts)[:max_nodes]
@@ -209,12 +216,13 @@ def run(max_nodes: int = 3):
         logger.info(f"Researching node: {node['name']} (recent count: {node['count']})")
         collected_text = ""
 
-        # Web検索（リクエスト間に5秒待機）
+        # Web検索（リクエスト間に2秒待機）
         for kw in node["keywords"][:2]:
-            results = brave_search(kw)
+            results = brave_search(kw, cache)
             for r in results:
                 collected_text += f"\n{r['title']}\n{r['description']}\n"
-            time.sleep(5)
+            if results:  # キャッシュミスで実際にAPIを叩いた場合のみ待機
+                time.sleep(2)
 
         # YouTube検索
         for kw in node["keywords"][:1]:
@@ -223,12 +231,10 @@ def run(max_nodes: int = 3):
                 collected_text += f"\n{r['title']}\n{r['transcript']}\n"
 
         if not collected_text.strip():
-            # 外部検索が全滅した場合はClaudeの知識で直接生成
-            logger.warning(f"No content from external search for: {node['name']}, using Claude fallback")
-            points = research_with_claude_only(node["name"], node["keywords"])
-        else:
-            points = summarize_with_claude(collected_text, node["name"], node["keywords"])
+            logger.warning(f"No content found for node: {node['name']}")
+            continue
 
+        points = summarize_with_claude(collected_text, node["name"], node["keywords"])
         if not points:
             continue
 
@@ -244,6 +250,9 @@ def run(max_nodes: int = 3):
                 "collected_at": now_jst(),
                 "used": False,
             })
+
+    # キャッシュ保存
+    _save_cache(cache)
 
     pool.extend(new_items)
     save_json(STATE_DIR / "research_pool.json", pool)
