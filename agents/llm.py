@@ -1,4 +1,4 @@
-"""LLM抽象レイヤー: Anthropic / Gemini(REST) / GLM を環境に応じて切り替え"""
+"""LLM抽象レイヤー: 設定済みバックエンドを順に試し、最初に成功したものを使う"""
 import os
 import json
 import logging
@@ -6,31 +6,37 @@ import requests
 
 logger = logging.getLogger("llm")
 
-# 優先順位: ANTHROPIC > GEMINI > GLM
-_BACKENDS = ["anthropic", "gemini", "glm"]
 
-
-def _detect_backend() -> str:
+def _available_backends() -> list[tuple[str, callable]]:
+    """設定済みのバックエンドを優先順にリストアップ"""
+    backends = []
     if os.getenv("ANTHROPIC_API_KEY"):
-        return "anthropic"
+        backends.append(("anthropic", _call_anthropic))
     if os.getenv("GEMINI_API_KEY"):
-        return "gemini"
+        backends.append(("gemini", _call_gemini))
     if os.getenv("GLM_API_KEY"):
-        return "glm"
-    raise RuntimeError("LLM APIキーが未設定です（ANTHROPIC_API_KEY / GEMINI_API_KEY / GLM_API_KEY のいずれかを設定してください）")
+        backends.append(("glm", _call_glm))
+    return backends
 
 
 def call_llm(prompt: str, max_tokens: int = 1024) -> str:
-    """設定済みのLLMバックエンドを呼び出してテキストを返す"""
-    backend = _detect_backend()
-    logger.debug(f"Using LLM backend: {backend}")
+    """設定済みのLLMバックエンドを順に試し、最初に成功した結果を返す"""
+    backends = _available_backends()
+    if not backends:
+        raise RuntimeError("LLM APIキーが未設定です（ANTHROPIC_API_KEY / GEMINI_API_KEY / GLM_API_KEY のいずれかを設定してください）")
 
-    if backend == "anthropic":
-        return _call_anthropic(prompt, max_tokens)
-    elif backend == "gemini":
-        return _call_gemini(prompt, max_tokens)
-    elif backend == "glm":
-        return _call_glm(prompt, max_tokens)
+    last_error = None
+    for name, fn in backends:
+        try:
+            logger.info(f"Trying LLM backend: {name}")
+            result = fn(prompt, max_tokens)
+            logger.info(f"LLM backend {name}: success")
+            return result
+        except Exception as e:
+            logger.warning(f"LLM backend {name} failed: {e}")
+            last_error = e
+
+    raise RuntimeError(f"全LLMバックエンドが失敗しました。最後のエラー: {last_error}")
 
 
 def _call_anthropic(prompt: str, max_tokens: int) -> str:
