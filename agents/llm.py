@@ -82,7 +82,7 @@ def _call_glm(prompt: str, max_tokens: int) -> str:
         base_url="https://open.bigmodel.cn/api/paas/v4/",
     )
     msg = client.chat.completions.create(
-        model="glm-4-flash",
+        model="glm-4.7-flash",
         max_tokens=max_tokens,
         messages=[{"role": "user", "content": prompt}],
     )
