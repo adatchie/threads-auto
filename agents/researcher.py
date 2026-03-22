@@ -1,5 +1,5 @@
 """
-リサーチャー: テーマツリーを見て不足ノードを特定し、YouTube/Web/Xからネタを収集する
+リサーチャー: テーマツリーを見て不足ノードを特定し、Web検索からネタを収集・要約する
 """
 import os
 import json
@@ -9,41 +9,13 @@ import requests
 from datetime import datetime, timedelta, timezone
 from collections import Counter
 from utils import load_json, save_json, log_error, now_jst, STATE_DIR, KNOWLEDGE_DIR
+from search import web_search
+from llm import call_llm_json
 
 logger = logging.getLogger("researcher")
 
-BRAVE_API_KEY = os.getenv("BRAVE_SEARCH_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 JST = timezone(timedelta(hours=9))
-
-# 検索キャッシュ: 同じキーワードを7日間は再検索しない
-SEARCH_CACHE_FILE = STATE_DIR / "search_cache.json"
-CACHE_TTL_DAYS = 7
-
-
-def _load_cache() -> dict:
-    try:
-        return load_json(SEARCH_CACHE_FILE)
-    except Exception:
-        return {}
-
-
-def _save_cache(cache: dict):
-    save_json(SEARCH_CACHE_FILE, cache)
-
-
-def _cache_get(cache: dict, query: str) -> list | None:
-    entry = cache.get(query)
-    if not entry:
-        return None
-    cached_at = datetime.fromisoformat(entry["cached_at"])
-    if datetime.now(JST) - cached_at > timedelta(days=CACHE_TTL_DAYS):
-        return None
-    return entry["results"]
-
-
-def _cache_set(cache: dict, query: str, results: list):
-    cache[query] = {"cached_at": now_jst(), "results": results}
 
 
 def get_recent_topic_counts(history: list, days: int = 14) -> Counter:
@@ -82,57 +54,8 @@ def find_underrepresented_nodes(topic_tree: dict, counts: Counter) -> list:
     return sorted(nodes, key=lambda n: (n["count"], n["priority"]))
 
 
-def brave_search(query: str, cache: dict, count: int = 5) -> list[dict]:
-    """Brave Search APIでウェブ検索。キャッシュヒット時はAPIを叩かない。"""
-    # キャッシュ確認
-    cached = _cache_get(cache, query)
-    if cached is not None:
-        logger.info(f"Brave search cache hit: {query}")
-        return cached
-
-    if not BRAVE_API_KEY:
-        logger.warning("BRAVE_SEARCH_API_KEY not set")
-        return []
-
-    url = "https://api.search.brave.com/res/v1/web/search"
-    headers = {"Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY}
-    params = {"q": query, "count": count}
-
-    for attempt in range(3):
-        try:
-            resp = requests.get(url, headers=headers, params=params, timeout=10)
-
-            # クォータ状況をログ出力
-            remaining = resp.headers.get("X-RateLimit-Remaining") or resp.headers.get("X-Quota-Remaining")
-            if remaining is not None:
-                logger.info(f"Brave quota remaining: {remaining}")
-
-            if resp.status_code == 200:
-                results = resp.json().get("web", {}).get("results", [])
-                data = [{"title": r["title"], "url": r["url"], "description": r.get("description", "")} for r in results]
-                _cache_set(cache, query, data)
-                return data
-
-            elif resp.status_code == 429:
-                retry_after = int(resp.headers.get("Retry-After", 60))
-                logger.warning(f"Brave rate limited (attempt {attempt + 1}/3, retry-after={retry_after}s)")
-                if attempt < 2:
-                    logger.info(f"Waiting {retry_after}s...")
-                    time.sleep(retry_after)
-            else:
-                logger.error(f"Brave search HTTP {resp.status_code}: {resp.text[:200]}")
-                return []
-
-        except Exception as e:
-            logger.error(f"Brave search error: {e}")
-            return []
-
-    logger.error("Brave search gave up after 3 retries (429) — クォータ枯渇の可能性あり")
-    return []
-
-
 def youtube_search(query: str, max_results: int = 3) -> list[dict]:
-    """YouTube Data APIで動画を検索し、文字起こし取得を試みる"""
+    """YouTube Data APIで動画を検索"""
     if not YOUTUBE_API_KEY:
         logger.warning("YOUTUBE_API_KEY not set, skipping YouTube search")
         return []
@@ -171,10 +94,8 @@ def _get_transcript(video_id: str) -> str:
         return ""
 
 
-def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) -> list:
-    """Anthropicでネタの要点を抽出"""
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+def summarize_content(content: str, topic_name: str, keywords: list[str]) -> list:
+    """LLMでネタの要点を抽出"""
     prompt = f"""以下のコンテンツから、Threads投稿のネタとして使えるポイントを3〜5個抽出してください。
 テーマ: {topic_name}（キーワード: {', '.join(keywords)}）
 コンテンツ:
@@ -185,19 +106,9 @@ def summarize_with_claude(content: str, topic_name: str, keywords: list[str]) ->
   ...
 ]"""
     try:
-        msg = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = msg.content[0].text.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-        return json.loads(text)
+        return call_llm_json(prompt, max_tokens=1024)
     except Exception as e:
-        logger.error(f"Anthropic summarize failed: {e}")
+        logger.error(f"LLM summarize failed: {e}")
         return []
 
 
@@ -206,7 +117,6 @@ def run(max_nodes: int = 3):
     history = load_json(STATE_DIR / "post_history.json")
     topic_tree = load_json(KNOWLEDGE_DIR / "topic_tree.json")
     pool = load_json(STATE_DIR / "research_pool.json")
-    cache = _load_cache()
 
     counts = get_recent_topic_counts(history)
     target_nodes = find_underrepresented_nodes(topic_tree, counts)[:max_nodes]
@@ -216,13 +126,16 @@ def run(max_nodes: int = 3):
         logger.info(f"Researching node: {node['name']} (recent count: {node['count']})")
         collected_text = ""
 
-        # Web検索（リクエスト間に2秒待機）
+        # Web検索（バックエンドは search.py が自動選択）
         for kw in node["keywords"][:2]:
-            results = brave_search(kw, cache)
-            for r in results:
-                collected_text += f"\n{r['title']}\n{r['description']}\n"
-            if results:  # キャッシュミスで実際にAPIを叩いた場合のみ待機
-                time.sleep(2)
+            try:
+                results = web_search(kw)
+                for r in results:
+                    collected_text += f"\n{r['title']}\n{r['description']}\n"
+                if results:
+                    time.sleep(2)
+            except Exception as e:
+                logger.error(f"Search failed for '{kw}': {e}")
 
         # YouTube検索
         for kw in node["keywords"][:1]:
@@ -234,7 +147,7 @@ def run(max_nodes: int = 3):
             logger.warning(f"No content found for node: {node['name']}")
             continue
 
-        points = summarize_with_claude(collected_text, node["name"], node["keywords"])
+        points = summarize_content(collected_text, node["name"], node["keywords"])
         if not points:
             continue
 
@@ -250,9 +163,6 @@ def run(max_nodes: int = 3):
                 "collected_at": now_jst(),
                 "used": False,
             })
-
-    # キャッシュ保存
-    _save_cache(cache)
 
     pool.extend(new_items)
     save_json(STATE_DIR / "research_pool.json", pool)

@@ -80,8 +80,7 @@ def run():
 
 
 def generate_feedback_with_claude(pattern_avg, topic_avg, top_patterns, avoid_patterns, top_topics, total) -> str:
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
+    from llm import call_llm
 
     summary = f"""直近{total}件の投稿分析結果:
 
@@ -103,14 +102,9 @@ def generate_feedback_with_claude(pattern_avg, topic_avg, top_patterns, avoid_pa
 200字程度で具体的に書いてください。"""
 
     try:
-        msg = client.chat.completions.create(
-            model="glm-4-flash",
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return msg.choices[0].message.content.strip()
+        return call_llm(prompt, max_tokens=512)
     except Exception as e:
-        logger.error(f"GLM feedback generation failed: {e}")
+        logger.error(f"LLM feedback generation failed: {e}")
         return f"上位パターン: {top_patterns}。上位テーマ: {top_topics}。避けるパターン: {avoid_patterns}。"
 
 

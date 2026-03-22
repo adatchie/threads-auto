@@ -92,9 +92,8 @@ def select_topic_node(pool: list, recent_topics: list) -> dict | None:
 
 
 def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dict, hooks: list) -> str:
-    """GLMで投稿を生成"""
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
+    """LLMで投稿を生成"""
+    from llm import call_llm
 
     hook_examples = "\n".join([f'- {h["example"]}' for h in hooks[:5]])
     feedback = analyst_report.get("feedback_text", "")
@@ -130,18 +129,12 @@ def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dic
 
 投稿本文のみを出力してください（前置き・説明不要）。"""
 
-    msg = client.chat.completions.create(
-        model="glm-4-flash",
-        max_tokens=800,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.choices[0].message.content.strip()
+    return call_llm(prompt, max_tokens=800)
 
 
 def score_post(content: str, pattern: dict, account: dict) -> float:
-    """GLMで投稿を10項目採点し、平均スコアを返す"""
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
+    """LLMで投稿を10項目採点し、平均スコアを返す"""
+    from llm import call_llm_json
 
     dimensions_text = "\n".join([f"{i+1}. {d}" for i, d in enumerate(SCORE_DIMENSIONS)])
 
@@ -163,17 +156,7 @@ JSON形式で出力してください:
 {{"scores": [点数, 点数, ...（10個）], "average": 平均値, "feedback": "改善点を一言で"}}"""
 
     try:
-        msg = client.chat.completions.create(
-            model="glm-4-flash",
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = msg.choices[0].message.content.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-        result = json.loads(text)
+        result = call_llm_json(prompt, max_tokens=512)
         return float(result.get("average", 0))
     except Exception as e:
         logger.error(f"Scoring failed: {e}")
