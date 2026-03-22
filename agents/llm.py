@@ -97,4 +97,15 @@ def call_llm_json(prompt: str, max_tokens: int = 1024) -> dict | list:
         text = text.split("```json")[1].split("```")[0].strip()
     elif "```" in text:
         text = text.split("```")[1].split("```")[0].strip()
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # JSON部分を抽出して再試行
+        import re
+        match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+        match = re.search(r'\[[^\[\]]*(?:\[[^\[\]]*\][^\[\]]*)*\]', text, re.DOTALL)
+        if match:
+            return json.loads(match.group())
+        raise

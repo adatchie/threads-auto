@@ -1,8 +1,1 @@
-[
-  {
-    "timestamp": "2026-03-23T04:20:48.904846+09:00",
-    "agent": "writer",
-    "message": "Post generation failed",
-    "detail": "全LLMバックエンドが失敗しました。最後のエラー: Error code: 500 - {'error': {'code': '1234', 'message': '网络错误，错误id：202603230316487ecde7f8612c4f32，请联系客服。'}}"
-  }
-]
+[]

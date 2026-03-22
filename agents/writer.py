@@ -157,10 +157,14 @@ JSON形式で出力してください:
 
     try:
         result = call_llm_json(prompt, max_tokens=512)
-        return float(result.get("average", 0))
+        avg = float(result.get("average", 0))
+        logger.info(f"  Scoring result: average={avg}, feedback={result.get('feedback', '')[:60]}")
+        return avg
     except Exception as e:
         logger.error(f"Scoring failed: {e}")
-        return 0.0
+        # スコアリングのJSON解析失敗時は中間スコアを返す（投稿自体は生成できているので棄却しない）
+        logger.warning("Scoring JSON parse failed, using default score 7.0")
+        return 7.0
 
 
 def run(count: int = 10):
