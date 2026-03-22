@@ -30,7 +30,7 @@ def call_llm(prompt: str, max_tokens: int = 1024) -> str:
         try:
             logger.info(f"Trying LLM backend: {name}")
             result = fn(prompt, max_tokens)
-            logger.info(f"LLM backend {name}: success")
+            logger.info(f"LLM backend {name}: success (len={len(result)})")
             return result
         except Exception as e:
             logger.warning(f"LLM backend {name} failed: {e}")

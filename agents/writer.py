@@ -220,6 +220,10 @@ def run(count: int = 10):
         for attempt in range(MAX_RETRIES + 1):
             try:
                 candidate = generate_post(pattern, topic, account, analyst_report, hooks)
+                logger.info(f"  Generated content length: {len(candidate)} chars, first 50: {repr(candidate[:50])}")
+                if not candidate or len(candidate.strip()) < 20:
+                    logger.warning(f"  Empty or too short content, skipping")
+                    continue
                 score = score_post(candidate, pattern, account)
                 logger.info(f"  Generated post (attempt {attempt+1}): score={score:.1f}")
 
