@@ -3,6 +3,7 @@
 """
 import os
 import logging
+import time
 import requests
 from datetime import datetime, timedelta, timezone
 from collections import Counter
@@ -53,21 +54,31 @@ def find_underrepresented_nodes(topic_tree: dict, counts: Counter) -> list:
 
 
 def brave_search(query: str, count: int = 5) -> list[dict]:
-    """Brave Search APIでウェブ検索"""
+    """Brave Search APIでウェブ検索。429時はリトライ。"""
     if not BRAVE_API_KEY:
         logger.warning("BRAVE_SEARCH_API_KEY not set")
         return []
     url = "https://api.search.brave.com/res/v1/web/search"
     headers = {"Accept": "application/json", "X-Subscription-Token": BRAVE_API_KEY}
     params = {"q": query, "count": count}
-    try:
-        resp = requests.get(url, headers=headers, params=params, timeout=10)
-        resp.raise_for_status()
-        results = resp.json().get("web", {}).get("results", [])
-        return [{"title": r["title"], "url": r["url"], "description": r.get("description", "")} for r in results]
-    except Exception as e:
-        logger.error(f"Brave search failed: {e}")
-        return []
+    for attempt, wait in enumerate([0, 10, 30]):
+        if wait:
+            time.sleep(wait)
+        try:
+            resp = requests.get(url, headers=headers, params=params, timeout=10)
+            if resp.status_code == 200:
+                results = resp.json().get("web", {}).get("results", [])
+                return [{"title": r["title"], "url": r["url"], "description": r.get("description", "")} for r in results]
+            elif resp.status_code == 429:
+                logger.warning(f"Brave search rate limited (attempt {attempt + 1}/3)")
+            else:
+                logger.error(f"Brave search failed: {resp.status_code}")
+                return []
+        except Exception as e:
+            logger.error(f"Brave search error: {e}")
+            return []
+    logger.error("Brave search gave up after 3 retries (429)")
+    return []
 
 
 def youtube_search(query: str, max_results: int = 3) -> list[dict]:
@@ -153,11 +164,12 @@ def run(max_nodes: int = 3):
         logger.info(f"Researching node: {node['name']} (recent count: {node['count']})")
         collected_text = ""
 
-        # Web検索
+        # Web検索（リクエスト間に1秒待機）
         for kw in node["keywords"][:2]:
             results = brave_search(kw)
             for r in results:
                 collected_text += f"\n{r['title']}\n{r['description']}\n"
+            time.sleep(1)
 
         # YouTube検索
         for kw in node["keywords"][:1]:
