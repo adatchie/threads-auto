@@ -15,7 +15,7 @@ logger = logging.getLogger("writer")
 JST = timezone(timedelta(hours=9))
 MAX_RETRIES = 2
 REVIEW_HOURS = 2  # Discord確認猶予時間（時間）
-MIN_QUALITY_SCORE = 7.0
+MIN_QUALITY_SCORE = 6.5
 MAX_SIMILARITY = 0.85
 RECENT_PATTERN_WINDOW = 3  # 直近N件で同パターン禁止
 RECENT_THEME_WINDOW = 3    # 直近N件で同テーマ連続禁止
@@ -236,6 +236,11 @@ def run(count: int = 10):
 
         if content is None:
             rejected += 1
+            # 失敗したtopicもusedにマークして無限ループを防ぐ
+            for item in pool:
+                if item["id"] == topic["id"]:
+                    item["used"] = True
+                    break
             continue
 
         # キューに追加
