@@ -12,11 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # LLM（優先: ANTHROPIC > GEMINI > GLM）
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+      # 検索
+      BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+      GOOGLE_CSE_KEY: ${{ secrets.GOOGLE_CSE_KEY }}
+      GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
+      # Threads
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+      # Optional
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main
           token: ${{ secrets.GH_PAT }}
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,39 +42,19 @@ jobs:
         run: pip install -r requirements.txt
       - name: Supervisor check
         working-directory: agents
-        env:
-          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
-          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
-          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
         run: python supervisor.py --check
       - name: Fetcher (get metrics)
         working-directory: agents
-        env:
-          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
-          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python fetcher.py
       - name: Analyst
         working-directory: agents
-        env:
-          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
         run: python analyst.py
       - name: Researcher
         working-directory: agents
-        env:
-          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
-          BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
         run: python researcher.py
-      - name: Writer (generate 10 posts)
+      - name: Writer (generate 3 posts - debug)
         working-directory: agents
-        env:
-          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python writer.py --count 10
+        run: python writer.py --count 3
       - name: Commit state changes
         run: |
           git config user.name "threads-bot"

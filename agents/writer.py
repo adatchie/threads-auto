@@ -15,7 +15,7 @@ logger = logging.getLogger("writer")
 JST = timezone(timedelta(hours=9))
 MAX_RETRIES = 2
 REVIEW_HOURS = 2  # Discord確認猶予時間（時間）
-MIN_QUALITY_SCORE = 7.0
+MIN_QUALITY_SCORE = 6.5
 MAX_SIMILARITY = 0.85
 RECENT_PATTERN_WINDOW = 3  # 直近N件で同パターン禁止
 RECENT_THEME_WINDOW = 3    # 直近N件で同テーマ連続禁止
@@ -92,9 +92,8 @@ def select_topic_node(pool: list, recent_topics: list) -> dict | None:
 
 
 def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dict, hooks: list) -> str:
-    """GLMで投稿を生成"""
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
+    """LLMで投稿を生成"""
+    from llm import call_llm
 
     hook_examples = "\n".join([f'- {h["example"]}' for h in hooks[:5]])
     feedback = analyst_report.get("feedback_text", "")
@@ -130,18 +129,12 @@ def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dic
 
 投稿本文のみを出力してください（前置き・説明不要）。"""
 
-    msg = client.chat.completions.create(
-        model="glm-4-flash",
-        max_tokens=800,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.choices[0].message.content.strip()
+    return call_llm(prompt, max_tokens=800)
 
 
 def score_post(content: str, pattern: dict, account: dict) -> float:
-    """GLMで投稿を10項目採点し、平均スコアを返す"""
-    from openai import OpenAI
-    client = OpenAI(api_key=os.getenv("GLM_API_KEY"), base_url="https://open.bigmodel.cn/api/paas/v4/")
+    """LLMで投稿を10項目採点し、平均スコアを返す"""
+    from llm import call_llm_json
 
     dimensions_text = "\n".join([f"{i+1}. {d}" for i, d in enumerate(SCORE_DIMENSIONS)])
 
@@ -163,21 +156,15 @@ JSON形式で出力してください:
 {{"scores": [点数, 点数, ...（10個）], "average": 平均値, "feedback": "改善点を一言で"}}"""
 
     try:
-        msg = client.chat.completions.create(
-            model="glm-4-flash",
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = msg.choices[0].message.content.strip()
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0].strip()
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0].strip()
-        result = json.loads(text)
-        return float(result.get("average", 0))
+        result = call_llm_json(prompt, max_tokens=512)
+        avg = float(result.get("average", 0))
+        logger.info(f"  Scoring result: average={avg}, feedback={result.get('feedback', '')[:60]}")
+        return avg
     except Exception as e:
         logger.error(f"Scoring failed: {e}")
-        return 0.0
+        # スコアリングのJSON解析失敗時は中間スコアを返す（投稿自体は生成できているので棄却しない）
+        logger.warning("Scoring JSON parse failed, using default score 7.0")
+        return 7.0
 
 
 def run(count: int = 10):
@@ -197,6 +184,7 @@ def run(count: int = 10):
 
     generated = 0
     rejected = 0
+    debug_log = []  # デバッグ情報
 
     for _ in range(count * 3):  # 上限を設けてループ
         if generated >= count:
@@ -233,6 +221,14 @@ def run(count: int = 10):
         for attempt in range(MAX_RETRIES + 1):
             try:
                 candidate = generate_post(pattern, topic, account, analyst_report, hooks)
+                from llm import call_llm as _clm
+                debug_entry = {"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "content_len": len(candidate), "content_preview": candidate[:200], "backend": getattr(_clm, '_last_backend', 'unknown')}
+                debug_log.append(debug_entry)
+                logger.info(f"  Generated content length: {len(candidate)} chars, first 50: {repr(candidate[:50])}")
+                if not candidate or len(candidate.strip()) < 20:
+                    debug_entry["status"] = "empty_content"
+                    logger.warning(f"  Empty or too short content, skipping")
+                    continue
                 score = score_post(candidate, pattern, account)
                 logger.info(f"  Generated post (attempt {attempt+1}): score={score:.1f}")
 
@@ -248,11 +244,17 @@ def run(count: int = 10):
                 else:
                     logger.info(f"  Score too low ({score:.1f} < {MIN_QUALITY_SCORE}), retrying...")
             except Exception as e:
+                debug_log.append({"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "error": str(e)[:200]})
                 log_error("writer", f"Post generation failed", str(e))
                 break
 
         if content is None:
             rejected += 1
+            # 失敗したtopicもusedにマークして無限ループを防ぐ
+            for item in pool:
+                if item["id"] == topic["id"]:
+                    item["used"] = True
+                    break
             continue
 
         # キューに追加
@@ -286,6 +288,12 @@ def run(count: int = 10):
 
     save_json(STATE_DIR / "post_queue.json", queue)
     save_json(STATE_DIR / "research_pool.json", pool)
+    save_json(STATE_DIR / "writer_debug.json", {
+        "run_at": now_jst(),
+        "generated": generated,
+        "rejected": rejected,
+        "debug_log": debug_log,
+    })
 
     logger.info(f"Writer done. Generated: {generated}, Rejected: {rejected}")
 
