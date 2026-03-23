@@ -139,6 +139,22 @@ def is_review_period_over(post_item: dict) -> bool:
     except Exception:
         return True
 
+
+def is_scheduled_slot_reached(post_item: dict) -> bool:
+    """scheduled_slot を過ぎているか確認（過ぎていたら投稿OK）"""
+    from datetime import datetime, timedelta, timezone
+    JST = timezone(timedelta(hours=9))
+    slot_str = post_item.get("scheduled_slot")
+    if not slot_str:
+        return True
+    try:
+        slot = datetime.fromisoformat(slot_str)
+        if slot.tzinfo is None:
+            slot = slot.replace(tzinfo=JST)
+        return datetime.now(JST) >= slot
+    except Exception:
+        return True
+
 def run(dry_run: bool = False):
     if is_kill_switch_on():
         logger.warning("KILL_SWITCH is enabled. Poster aborted.")
@@ -167,13 +183,15 @@ def run(dry_run: bool = False):
     # キューから次の投稿を取得
     pending = [
         q for q in queue
-        if q["status"] == "pending" and is_review_period_over(q)
+        if q["status"] == "pending"
+        and is_review_period_over(q)
+        and is_scheduled_slot_reached(q)
     ]
     if not pending:
-        review_waiting = [q for q in queue if q["status"] == "pending"]
-        if review_waiting:
-            nxt = min(review_waiting, key=lambda q: q.get("review_until", ""))
-            logger.info(f"レビュー猶予中。次の投稿可能: {nxt.get('review_until', '')}") 
+        waiting = [q for q in queue if q["status"] == "pending"]
+        if waiting:
+            nxt = min(waiting, key=lambda q: q.get("scheduled_slot") or q.get("review_until", ""))
+            logger.info(f"スロット待機中。次の投稿可能: {nxt.get('scheduled_slot') or nxt.get('review_until', '')}")
     if not pending:
         logger.info("No pending posts in queue.")
         return
