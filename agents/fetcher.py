@@ -48,15 +48,15 @@ def fetch_metrics(threads_id: str) -> dict | None:
         return None
 
 
-def run():
-    logger.info("Fetcher started")
+def run(force: bool = False):
+    logger.info(f"Fetcher started{'  (force mode)' if force else ''}")
     history = load_json(STATE_DIR / "post_history.json")
     now = datetime.now(JST)
     fetched_count = 0
 
     for post in history:
         # メトリクス未取得かつDRY_RUN IDでないものが対象
-        if post.get("metrics") is not None:
+        if post.get("metrics") is not None and not force:
             continue
         threads_id = post.get("threads_id", "")
         if not threads_id or threads_id.startswith("DRY_RUN"):
@@ -75,10 +75,10 @@ def run():
 
         hours_elapsed = (now - post_time).total_seconds() / 3600
 
-        if hours_elapsed < FETCH_AFTER_HOURS:
+        if not force and hours_elapsed < FETCH_AFTER_HOURS:
             logger.debug(f"Post {post['id']}: too early ({hours_elapsed:.1f}h < {FETCH_AFTER_HOURS}h)")
             continue
-        if hours_elapsed > FETCH_BEFORE_HOURS:
+        if not force and hours_elapsed > FETCH_BEFORE_HOURS:
             # 古すぎる投稿はとりあえず空メトリクスで埋める
             post["metrics"] = {"views": 0, "likes": 0, "replies": 0, "reposts": 0, "quotes": 0, "note": "fetch_skipped_too_old"}
             continue
@@ -97,4 +97,6 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    import sys
+    force = "--force" in sys.argv
+    run(force=force)
