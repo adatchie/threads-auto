@@ -94,10 +94,12 @@
     "quality_score": 7.9,
     "has_affiliate": false,
     "affiliate_campaign_id": null,
-    "status": "pending",
+    "status": "posted",
     "review_until": "2026-03-23T13:23:29.421576+09:00",
     "created_at": "2026-03-23T11:23:29.421616+09:00",
-    "scheduled_slot": "2026-03-24T18:00:00+09:00"
+    "scheduled_slot": "2026-03-24T18:00:00+09:00",
+    "posted_at": "2026-03-24T20:44:11.016169+09:00",
+    "threads_id": "18457415950111434"
   },
   {
     "id": "post_ab1dd73f",
