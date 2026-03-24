@@ -195,5 +195,44 @@
     "review_until": "2026-03-24T09:30:01.871280+09:00",
     "created_at": "2026-03-24T07:30:01.871320+09:00",
     "scheduled_slot": "2026-03-25T20:00:00+09:00"
+  },
+  {
+    "id": "post_de276afd",
+    "content": "職務経歴書を使い回してる人、書類で落とされてますよ。\n\n応募先企業が求めてる人物像を読み込んで、職務経歴書をカスタマイズするだけで通過率ガクッと変わるんだ。\n\n募集要項から「必要な経験」「業務内容」を拾い出して、自分の過去の経験をそこに合わせて書く。企業目線だと「うちで活躍しそう」って判断になりやすい。\n\n同じ転職者でも、採用担当者の視点で経歴を整理できてる人が勝つ。ちょっと手間かけるだけで差つくよ。",
+    "pattern": "assertion_short",
+    "topic_node": "resume_writing",
+    "quality_score": 7.1,
+    "has_affiliate": false,
+    "affiliate_campaign_id": null,
+    "status": "pending",
+    "review_until": "2026-03-25T09:28:15.597894+09:00",
+    "created_at": "2026-03-25T07:28:15.597922+09:00",
+    "scheduled_slot": null
+  },
+  {
+    "id": "post_b0b73252",
+    "content": "面接で落ちる人、実は同じ7つの理由で引っかかってる。\n\nスキルが足りないわけじゃなく、面接での立ち振る舞いや準備不足が原因なことがほとんど。\n\n実際に採用側の目線を知ると、気づかないうちにやってた失敗がわかるよ。\n\n返信で詳しく書くから見てみて。",
+    "pattern": "tree_expansion",
+    "topic_node": "fail_reasons",
+    "quality_score": 7.1,
+    "has_affiliate": false,
+    "affiliate_campaign_id": null,
+    "status": "pending",
+    "review_until": "2026-03-25T09:28:22.595732+09:00",
+    "created_at": "2026-03-25T07:28:22.595761+09:00",
+    "scheduled_slot": null
+  },
+  {
+    "id": "post_c27b17c6",
+    "content": "年収交渉のタイミングを間違えてる人、本当に多い。\n\n【失敗パターン】\n・面接の序盤で「年収は〇〇万円以上希望です」と伝える\n→企業側は「条件が合わなそう」と判断して落とす可能性がある\n\n・内定前に交渉を持ちかける\n→採用担当者は「まだ確定してない段階で要求？」と不信感を持つ\n\n・曖昧な理由で交渉する\n→「生活費が必要」とか「前職がこれくらい」では響かない\n\n【正しいやり方】\n内定をもらったあとのオファー面談が勝負。ここなら企業は採用を前提にしてるから、交渉に応じる可能性が一気に上がる。\n\nその時は「スキル・経験」「今後の貢献」を根拠に、冷静に提示した額の妥当性を説明する。感情ではなくロジックで攻める。\n\n内定後なら企業も「せっかく採用するなら満足させたい」と動く。タイミングがすべてだよ。",
+    "pattern": "warning",
+    "topic_node": "salary_negotiation",
+    "quality_score": 7.6,
+    "has_affiliate": false,
+    "affiliate_campaign_id": null,
+    "status": "pending",
+    "review_until": "2026-03-25T09:28:32.819708+09:00",
+    "created_at": "2026-03-25T07:28:32.819737+09:00",
+    "scheduled_slot": null
   }
 ]
