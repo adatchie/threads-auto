@@ -21,17 +21,10 @@ CRON_JOBS="
 # 毎朝7時: バッチ（リサーチ〜ライター）
 0 7 * * * cd $AGENTS_DIR && $PYTHON $(dirname $AGENTS_DIR)/scripts/daily_run.sh >> $PROJECT_DIR/logs/cron_batch.log 2>&1
 
-# 投稿スロット（1日10枠）
+# 投稿スロット（1日3枠: 朝出勤前・昼休み・夜帰宅後）
 0 8 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-0 10 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
 0 12 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-0 14 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-0 16 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-0 18 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
 0 20 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-30 21 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-30 23 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
-30 0 * * * cd $AGENTS_DIR && $PYTHON poster.py >> $PROJECT_DIR/logs/cron_poster.log 2>&1
 "
 
 # 既存の設定 + 新設定をマージ
