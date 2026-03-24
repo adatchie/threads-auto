@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "test_001",
+    "timestamp": "2026-03-24T09:30:35.665951+09:00",
+    "threads_id": "18098254324988020",
+    "content": "転職したいけど、なんとなく踏み出せない人いる？ 🤔\n\n「辞めたら後悔するかも」\n「何から始めればいいかわからない」\n「自分のスペックで受かる会社あるのかな」\n\nこういう不安、ぜんぶ整理できる話を書くよ。\n\n需要あればいいね 👍",
+    "pattern": "demand_check",
+    "topic_node": "fear_of_change",
+    "quality_score": 80,
+    "has_affiliate": false,
+    "affiliate_comment_id": null,
+    "metrics": null
+  }
+]
