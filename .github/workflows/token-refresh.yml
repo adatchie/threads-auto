@@ -1,0 +1,35 @@
+name: Threads Token Refresh (Monthly)
+
+on:
+  schedule:
+    # 毎月1日 09:00 JST (= 00:00 UTC) に実行
+    - cron: '0 0 1 * *'
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh Threads access token
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          REPO_OWNER: adatchie
+          REPO_NAME: threads-auto
+        run: python scripts/refresh_token.py
