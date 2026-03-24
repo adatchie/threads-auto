@@ -29,7 +29,9 @@ def fetch_metrics(threads_id: str) -> dict | None:
     }
     try:
         resp = requests.get(url, params=params, timeout=10)
-        resp.raise_for_status()
+        if not resp.ok:
+            logger.error(f"Failed to fetch metrics for {threads_id}: {resp.status_code} body={resp.text}")
+            return None
         data = resp.json().get("data", [])
         metrics = {}
         for item in data:
