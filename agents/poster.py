@@ -13,12 +13,13 @@ logger = logging.getLogger("poster")
 
 JST = timezone(timedelta(hours=9))
 THREADS_API_BASE = "https://graph.threads.net/v1.0"
-MAX_POSTS_PER_DAY = 15
+MAX_POSTS_PER_DAY = 3
 MIN_INTERVAL_MINUTES = 60
 RANDOM_DELAY_SECONDS = 300  # ±5分
 
-# 1日のタイムスロット（24h表記 JST）
-TIME_SLOTS = [8, 10, 12, 14, 16, 18, 20, 21, 23, 0]  # 10スロット
+# 1日のタイムスロット（24h表記 JST）- ピーク時間帯3本に絞る
+# 朝出勤前・昼休み・夜帰宅後
+TIME_SLOTS = [8, 12, 20]  # 3スロット
 
 
 def get_access_token() -> str:
