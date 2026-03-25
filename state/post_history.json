@@ -9,7 +9,14 @@
     "quality_score": 80,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 62,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:26.223427+09:00"
+    }
   },
   {
     "id": "post_66d5d380",
@@ -21,7 +28,14 @@
     "quality_score": 7.7,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 34,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:26.500449+09:00"
+    }
   },
   {
     "id": "post_b650bf27",
@@ -33,7 +47,14 @@
     "quality_score": 7.8,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 20,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:27.096752+09:00"
+    }
   },
   {
     "id": "post_c027ab61",
@@ -45,7 +66,14 @@
     "quality_score": 7.7,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 37,
+      "likes": 1,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:27.365920+09:00"
+    }
   },
   {
     "id": "post_585775b3",
@@ -57,7 +85,14 @@
     "quality_score": 8.1,
     "has_affiliate": true,
     "affiliate_comment_id": "17992036910930848",
-    "metrics": null
+    "metrics": {
+      "views": 101,
+      "likes": 2,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:27.624847+09:00"
+    }
   },
   {
     "id": "post_71d8be9b",
@@ -69,7 +104,14 @@
     "quality_score": 8.3,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 55,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:27.882586+09:00"
+    }
   },
   {
     "id": "post_e031db38",
@@ -81,7 +123,14 @@
     "quality_score": 7.9,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 34,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:28.124939+09:00"
+    }
   },
   {
     "id": "post_ab1dd73f",
@@ -93,7 +142,14 @@
     "quality_score": 7.6,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 27,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:28.409534+09:00"
+    }
   },
   {
     "id": "post_2ffbb163",
@@ -105,6 +161,13 @@
     "quality_score": 7.9,
     "has_affiliate": false,
     "affiliate_comment_id": null,
-    "metrics": null
+    "metrics": {
+      "views": 30,
+      "likes": 0,
+      "replies": 0,
+      "reposts": 0,
+      "quotes": 0,
+      "fetched_at": "2026-03-25T09:22:28.683995+09:00"
+    }
   }
 ]
