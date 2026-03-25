@@ -1,8 +1,37 @@
 {
-  "generated_at": null,
-  "top_patterns": [],
-  "avoid_patterns": [],
-  "top_topics": [],
-  "feedback_text": "データ不足。投稿を蓄積してから分析します。",
-  "post_count_analyzed": 0
+  "generated_at": "2026-03-26T07:32:33.925352+09:00",
+  "post_count_analyzed": 9,
+  "top_patterns": [
+    "tip_deep",
+    "list_3",
+    "demand_check"
+  ],
+  "avoid_patterns": [
+    "demand_check",
+    "before_after",
+    "mistake_lesson"
+  ],
+  "top_topics": [
+    "未経験転職の方法",
+    "転職タイミング",
+    "fear_of_change"
+  ],
+  "pattern_scores": {
+    "demand_check": 0.0,
+    "before_after": 0.0,
+    "mistake_lesson": 0.0,
+    "list_3": 4.054,
+    "tip_deep": 10.891,
+    "question_answer": 0.0
+  },
+  "topic_scores": {
+    "fear_of_change": 0.0,
+    "年収交渉のやり方": 0.0,
+    "転職エージェントの使い方": 0.0,
+    "転職タイミング": 4.054,
+    "未経験転職の方法": 5.446,
+    "転職後の年収アップ": 0.0,
+    "ブラック企業の見分け方": 0.0
+  },
+  "feedback_text": "# 次のバッチの投稿指示\n\n**優先パターン：** 「tip_deep」を最優先に。深掘り系のコンテンツ（実践的なノウハウ、詳細な解説）がエンゲージメント10.89と圧倒的に高い。毎回必ず含める。次点で「list_3」も活用。\n\n**優先テーマ：** 「未経験転職の方法」と「転職タイミング」に集中。この2テーマで計9.5のエンゲージメント獲得。特に未経験転職は関心層が厚い。\n\n**避けるべき：** 「demand_check」「before_after」「mistake_lesson」「question_answer」はエンゲージメント0。これらのパターンは一時的に削除。また、年収交渉やブラック企業判定などのテーマも反応が薄いため後回し。\n\n**改善点：** tip_deepの形式を徹底分析し、そのフレームワークを他テーマにも応用。ユーザーが「深い学習」を求めていることが明白。"
 }

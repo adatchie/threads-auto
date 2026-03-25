@@ -151,7 +151,7 @@
     "detail": "アルバイト経験でも応募先企業に関連する特殊な経験があれば、それが差別化のポイントになる",
     "hook_potential": "高",
     "collected_at": "2026-03-23T05:22:13.450990+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_resume_writing_2026-03-23_4",
@@ -184,7 +184,7 @@
     "detail": "一次・二次・最終面接で評価基準が変わり、フェーズごとに落ちやすいポイントが存在する",
     "hook_potential": "高",
     "collected_at": "2026-03-23T05:22:21.653621+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_fail_reasons_2026-03-23_7",
@@ -239,7 +239,7 @@
     "detail": "自分のスキル・経験・成果を整理し、業界給与データで相場を把握することが必須。根拠のない金額要求は『自己評価が高すぎる人』と見なされるリスク",
     "hook_potential": "高",
     "collected_at": "2026-03-23T05:22:31.892927+09:00",
-    "used": false
+    "used": true
   },
   {
     "id": "research_salary_negotiation_2026-03-23_12",
@@ -602,6 +602,171 @@
     "detail": "タイミングや方法を誤ると評価を下げられるリスクがある。必ずしも交渉が成功するとは限らないため、冷静に相手の立場を尊重しながら進めることが鍵",
     "hook_potential": "中",
     "collected_at": "2026-03-25T07:28:06.878633+09:00",
+    "used": false
+  },
+  {
+    "id": "research_resume_writing_2026-03-26_0",
+    "topic_node": "resume_writing",
+    "topic_name": "職務経歴書の書き方",
+    "category": "転職準備",
+    "point": "職務経歴書は『応募先企業の求める人物像に合わせて内容を調整する』が鉄則",
+    "detail": "募集要項や企業サイトから求められている人物像を事前分析し、実際の業務につながるキャリアを書くことで、企業にとって有益な人材であることをアピールできる",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:43.026871+09:00",
+    "used": false
+  },
+  {
+    "id": "research_resume_writing_2026-03-26_1",
+    "topic_node": "resume_writing",
+    "topic_name": "職務経歴書の書き方",
+    "category": "転職準備",
+    "point": "職務経歴書は『編年体（時系列順）』が最もポピュラーな書き方",
+    "detail": "過去から現在へ時系列順に記載する形式で、情報が整理しやすく、採用担当者にとって読みやすい。職務経歴書の提出日を忘れずに記入すること",
+    "hook_potential": "中",
+    "collected_at": "2026-03-26T07:32:43.026888+09:00",
+    "used": false
+  },
+  {
+    "id": "research_resume_writing_2026-03-26_2",
+    "topic_node": "resume_writing",
+    "topic_name": "職務経歴書の書き方",
+    "category": "転職準備",
+    "point": "『特別な経験』や『通常では経験できないような案件』を明確に書き出す",
+    "detail": "アルバイト経験も含め、応募先企業にアピールできる特殊な経験があれば、それを際立たせて記載することが書類選考通過率を上げる",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:43.026905+09:00",
+    "used": false
+  },
+  {
+    "id": "research_resume_writing_2026-03-26_3",
+    "topic_node": "resume_writing",
+    "topic_name": "職務経歴書の書き方",
+    "category": "転職準備",
+    "point": "職務経歴書は『A4縦サイズ1～2枚、パソコンで横書き』が標準フォーマット",
+    "detail": "白無地の紙に統一されたフォーマットで作成することが、プロフェッショナルな印象を与える。テンプレートの活用で初心者も簡単に作成可能",
+    "hook_potential": "中",
+    "collected_at": "2026-03-26T07:32:43.026922+09:00",
+    "used": false
+  },
+  {
+    "id": "research_resume_writing_2026-03-26_4",
+    "topic_node": "resume_writing",
+    "topic_name": "職務経歴書の書き方",
+    "category": "転職準備",
+    "point": "職務経歴書作成前に『求める資格』『業務内容』から企業ニーズを分析する準備が重要",
+    "detail": "いきなり書き始めるのではなく、事前分析→キャリア整理→執筆というステップで、採用担当者に響く書類が作成できる",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:43.026936+09:00",
+    "used": false
+  },
+  {
+    "id": "research_fail_reasons_2026-03-26_5",
+    "topic_node": "fail_reasons",
+    "topic_name": "面接で落ちる理由",
+    "category": "面接攻略",
+    "point": "面接に落ちる人に共通する5つの特徴",
+    "detail": "①第一印象が悪い ②話が長い ③自己分析が不足 ④業界・企業研究が不足 ⑤面接対策が不足。これらは改善可能な項目",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:51.440859+09:00",
+    "used": false
+  },
+  {
+    "id": "research_fail_reasons_2026-03-26_6",
+    "topic_node": "fail_reasons",
+    "topic_name": "面接で落ちる理由",
+    "category": "面接攻略",
+    "point": "一次・二次・最終面接で落ちる理由が異なる",
+    "detail": "面接のフェーズごとに面接官の評価基準が変わるため、不採用の理由も段階によって異なる。段階別対策が必要",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:51.440875+09:00",
+    "used": false
+  },
+  {
+    "id": "research_fail_reasons_2026-03-26_7",
+    "topic_node": "fail_reasons",
+    "topic_name": "面接で落ちる理由",
+    "category": "面接攻略",
+    "point": "面接で落ちた理由を企業は教えてくれない現実",
+    "detail": "不採用理由を聞きたくても、企業は詳しい理由を答えてくれないケースがほとんど。次に活かすには自己分析が重要",
+    "hook_potential": "中",
+    "collected_at": "2026-03-26T07:32:51.440892+09:00",
+    "used": false
+  },
+  {
+    "id": "research_fail_reasons_2026-03-26_8",
+    "topic_node": "fail_reasons",
+    "topic_name": "面接で落ちる理由",
+    "category": "面接攻略",
+    "point": "転職面接は落ちるのが当たり前という認識の重要性",
+    "detail": "落ちる人の方が多いという事実を理解していないと、不合格時に精神的ダメージが大きくなる。心構えが大切",
+    "hook_potential": "中",
+    "collected_at": "2026-03-26T07:32:51.440909+09:00",
+    "used": false
+  },
+  {
+    "id": "research_fail_reasons_2026-03-26_9",
+    "topic_node": "fail_reasons",
+    "topic_name": "面接で落ちる理由",
+    "category": "面接攻略",
+    "point": "自己分析と企業研究の不足が落ちる主要因",
+    "detail": "話の長さや第一印象よりも、根本的な準備不足が不採用につながる。事前準備の質が合否を大きく左右する",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:51.440924+09:00",
+    "used": false
+  },
+  {
+    "id": "research_salary_negotiation_2026-03-26_10",
+    "topic_node": "salary_negotiation",
+    "topic_name": "年収交渉のやり方",
+    "category": "年収交渉",
+    "point": "年収交渉のベストタイミングは「内定後」である",
+    "detail": "企業が採用を前提にしているため交渉に応じやすい。面接時に伝える派もいるが、内定後が最も有利な状況。",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:59.843331+09:00",
+    "used": false
+  },
+  {
+    "id": "research_salary_negotiation_2026-03-26_11",
+    "topic_node": "salary_negotiation",
+    "topic_name": "年収交渉のやり方",
+    "category": "年収交渉",
+    "point": "市場価値の分析なしに交渉すると自分を過大評価と見なされる",
+    "detail": "業界給与ガイドなどで相場を調べ、自分のスキル・経験と照らし合わせた根拠ある金額設定が必須。",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:59.843350+09:00",
+    "used": false
+  },
+  {
+    "id": "research_salary_negotiation_2026-03-26_12",
+    "topic_node": "salary_negotiation",
+    "topic_name": "年収交渉のやり方",
+    "category": "年収交渉",
+    "point": "未経験職への転職は年収交渉を避けた方が無難",
+    "detail": "ただし相場を大きく下回る提示や活かせるスキルがある場合は交渉の余地あり。",
+    "hook_potential": "中",
+    "collected_at": "2026-03-26T07:32:59.843367+09:00",
+    "used": false
+  },
+  {
+    "id": "research_salary_negotiation_2026-03-26_13",
+    "topic_node": "salary_negotiation",
+    "topic_name": "年収交渉のやり方",
+    "category": "年収交渉",
+    "point": "堂々とした態度と明確な根拠が交渉成功の鍵",
+    "detail": "自信がない態度や根拠なき要求は失敗する。実績・貢献度を論理的に説明する必要がある。",
+    "hook_potential": "高",
+    "collected_at": "2026-03-26T07:32:59.843383+09:00",
+    "used": false
+  },
+  {
+    "id": "research_salary_negotiation_2026-03-26_14",
+    "topic_node": "salary_negotiation",
+    "topic_name": "年収交渉のやり方",
+    "category": "年収交渉",
+    "point": "交渉失敗時のリスク：評価を下げてしまう可能性がある",
+    "detail": "タイミングや伝え方を間違えると逆効果。冷静に相手の立場を尊重しながら進めることが重要。",
+    "hook_potential": "中",
+    "collected_at": "2026-03-26T07:32:59.843395+09:00",
     "used": false
   }
 ]
