@@ -1098,5 +1098,53 @@
     "hook_potential": "中",
     "collected_at": "2026-03-28T07:29:02.541043+09:00",
     "used": false
+  },
+  {
+    "id": "buzz_timing_2026-03-28_0",
+    "topic_node": "timing",
+    "topic_name": "転職タイミング",
+    "category_id": "job_prep",
+    "category": "転職準備",
+    "source_type": "buzz_research",
+    "point": "転職タイミング向けに rebuttal 型として転用する。",
+    "detail": "外部バズ: のりI 転職3.0 en X: \"マイナビで転職支援してきた僕が「本音では勧めない転職のタイミング」を全部話します\" / X | hook=rebuttal | mechanisms=heuristic | source=https://x.com/nori_tenshoku3/status/2037124253955613113",
+    "hook_potential": "高",
+    "collected_at": "2026-03-28T23:48:12.837736+09:00",
+    "used": false,
+    "buzz_source_url": "https://x.com/nori_tenshoku3/status/2037124253955613113",
+    "buzz_source_title": "のりI 転職3.0 en X: \"マイナビで転職支援してきた僕が「本音では勧めない転職のタイミング」を全部話します\" / X",
+    "buzz_hook_type": "rebuttal"
+  },
+  {
+    "id": "buzz_timing_2026-03-28_1",
+    "topic_node": "timing",
+    "topic_name": "転職タイミング",
+    "category_id": "job_prep",
+    "category": "転職準備",
+    "source_type": "buzz_research",
+    "point": "転職タイミング向けに list 型として転用する。",
+    "detail": "外部バズ: X 上的 株式会社クリエイターズアカデミー｜求職者支援訓練・ロボット教室・AI企業向け社員研修：“求人が多い時期はいつ？転職を有利に進めるベストタイミングを解説 https://t.co/rNpkBOGRXo (ANA Business Solutions) #クリアカ #求人 多い #時期 #転職 #有利に進める #ベストタイミング 1～3月 5月後半～6月 8～10月 #ハロトレ #求職者支援訓練 2025/10/30” / X | hook=list | mechanisms=heuristic | source=https://x.com/c_aca_webdesign/status/2016866420718530767",
+    "hook_potential": "高",
+    "collected_at": "2026-03-28T23:48:12.837762+09:00",
+    "used": false,
+    "buzz_source_url": "https://x.com/c_aca_webdesign/status/2016866420718530767",
+    "buzz_source_title": "X 上的 株式会社クリエイターズアカデミー｜求職者支援訓練・ロボット教室・AI企業向け社員研修：“求人が多い時期はいつ？転職を有利に進めるベストタイミングを解説 https://t.co/rNpkBOGRXo (ANA Business Solutions) #クリアカ #求人 多い #時期 #転職 #有利に進める #ベストタイミング 1～3月 5月後半～6月 8～10月 #ハロトレ #求職者支援訓練 2025/10/30” / X",
+    "buzz_hook_type": "list"
+  },
+  {
+    "id": "buzz_timing_2026-03-28_2",
+    "topic_node": "timing",
+    "topic_name": "転職タイミング",
+    "category_id": "job_prep",
+    "category": "転職準備",
+    "source_type": "buzz_research",
+    "point": "転職タイミング向けに buzz_pivot 型として転用する。",
+    "detail": "外部バズ: キャリア孔明 en X: \"転職できない人ほど、タイミングを待つ。 ・もう少し経験を積んでから ・景気が良くなったら ・子供が大きくなったら れ、一生来ない順番待ちだ。 転職できる人は、今日から動く。 ・完璧なタイミングなんてない ・動いた人だけ選択肢が増える ・待ってる間に市場は変わる\" / X | hook=buzz_pivot | mechanisms=heuristic | source=https://x.com/career_koumei/status/2032411360135729420",
+    "hook_potential": "高",
+    "collected_at": "2026-03-28T23:48:12.837807+09:00",
+    "used": false,
+    "buzz_source_url": "https://x.com/career_koumei/status/2032411360135729420",
+    "buzz_source_title": "キャリア孔明 en X: \"転職できない人ほど、タイミングを待つ。 ・もう少し経験を積んでから ・景気が良くなったら ・子供が大きくなったら れ、一生来ない順番待ちだ。 転職できる人は、今日から動く。 ・完璧なタイミングなんてない ・動いた人だけ選択肢が増える ・待ってる間に市場は変わる\" / X",
+    "buzz_hook_type": "buzz_pivot"
   }
 ]

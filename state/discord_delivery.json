@@ -3,5 +3,10 @@
     "delivered": true,
     "timestamp": "2026-03-28T21:46:46.884209+09:00",
     "summary": "✅ 通常分析 | 十分な件数の投稿を分析しました。"
+  },
+  "buzz_insights": {
+    "delivered": true,
+    "timestamp": "2026-03-28T23:48:13.175065+09:00",
+    "summary": "unknown | sources=0 | insights=3 | rebuttal, list, buzz_pivot"
   }
 }
