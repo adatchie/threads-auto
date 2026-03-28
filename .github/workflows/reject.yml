@@ -7,22 +7,39 @@ on:
         description: '却下する投稿のID（例: post_abc12345）'
         required: true
         type: string
+      reason:
+        description: '却下理由（任意。次回生成の参考にする）'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   reject:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
       - run: pip install -r requirements.txt
-      - run: python scripts/reject.py ${{ github.event.inputs.post_id }}
+      - name: Run reject
+        run: |
+          POST_ID="${{ github.event.inputs.post_id }}"
+          REASON="${{ github.event.inputs.reason }}"
+          if [ -n "$REASON" ]; then
+            python scripts/reject.py "$POST_ID" --reason "$REASON"
+          else
+            python scripts/reject.py "$POST_ID"
+          fi
       - name: Commit updated state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add state/post_queue.json
+          git add state/
           git diff --staged --quiet || git commit -m "chore: reject post ${{ github.event.inputs.post_id }} [skip ci]"
           git push

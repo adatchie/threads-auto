@@ -1,11 +1,19 @@
-name: Threads Full Pipeline (manual)
+name: Threads Analysis
 on:
-  workflow_dispatch:  # 手動実行のみ。定期実行は analysis / generation に分割済み
+  schedule:
+    # 毎朝11:00 JST（= 02:00 UTC）
+    - cron: '0 2 * * *'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'state/**'
+  workflow_dispatch:  # 手動実行も可能
 concurrency:
-  group: threads-full-pipeline
+  group: threads-analysis
   cancel-in-progress: false
 jobs:
-  batch:
+  analyze:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,12 +46,19 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run full pipeline
-        run: bash scripts/daily_run.sh
+      - name: Fetcher (get metrics)
+        working-directory: agents
+        run: python fetcher.py
+      - name: Analyst
+        working-directory: agents
+        run: python analyst.py
+      - name: Supervisor check
+        working-directory: agents
+        run: python supervisor.py --check
       - name: Commit state changes
         run: |
           git config user.name "threads-bot"
           git config user.email "threads-bot@users.noreply.github.com"
           git add state/
-          git diff --cached --quiet || git commit -m "chore: update state after full pipeline [skip ci]"
+          git diff --cached --quiet || git commit -m "chore: update state after analysis [skip ci]"
           git push

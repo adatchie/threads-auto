@@ -8,7 +8,8 @@ import time
 import requests
 from datetime import datetime, timedelta, timezone
 from collections import Counter
-from utils import load_json, save_json, log_error, now_jst, STATE_DIR, KNOWLEDGE_DIR
+from utils import load_json, save_json, log_error, now_jst, STATE_DIR, KNOWLEDGE_DIR, is_kill_switch_on
+from feedback_state import get_active_feedback, derive_operator_targets, topic_tokens
 from search import web_search
 from llm import call_llm_json
 
@@ -37,8 +38,10 @@ def get_recent_topic_counts(history: list, days: int = 14) -> Counter:
     return counts
 
 
-def find_underrepresented_nodes(topic_tree: dict, counts: Counter) -> list:
+def find_underrepresented_nodes(topic_tree: dict, counts: Counter, boost_targets: set[str] | None = None, avoid_targets: set[str] | None = None) -> list:
     """カバレッジが低いノードを優先度順に返す"""
+    boost_targets = set(boost_targets or [])
+    avoid_targets = set(avoid_targets or [])
     nodes = []
     for cat in topic_tree["categories"]:
         for node in cat["nodes"]:
@@ -47,11 +50,23 @@ def find_underrepresented_nodes(topic_tree: dict, counts: Counter) -> list:
                 "id": nid,
                 "name": node["name"],
                 "keywords": node["keywords"],
+                "category_id": cat["id"],
                 "category": cat["name"],
                 "count": counts.get(nid, 0),
                 "priority": node.get("priority", 99),
             })
-    return sorted(nodes, key=lambda n: (n["count"], n["priority"]))
+
+    def sort_key(node: dict) -> tuple[int, int, int]:
+        tokens = topic_tokens(node)
+        if tokens & boost_targets:
+            rank = 0
+        elif tokens & avoid_targets:
+            rank = 2
+        else:
+            rank = 1
+        return (rank, node["count"], node["priority"])
+
+    return sorted(nodes, key=sort_key)
 
 
 def youtube_search(query: str, max_results: int = 3) -> list[dict]:
@@ -114,12 +129,23 @@ def summarize_content(content: str, topic_name: str, keywords: list[str]) -> lis
 
 def run(max_nodes: int = 3):
     logger.info("Researcher started")
+    if is_kill_switch_on():
+        logger.warning("KILL_SWITCH is enabled. Researcher aborted.")
+        return
+
     history = load_json(STATE_DIR / "post_history.json")
     topic_tree = load_json(KNOWLEDGE_DIR / "topic_tree.json")
     pool = load_json(STATE_DIR / "research_pool.json")
+    operator_feedback = get_active_feedback("research")
+    operator_targets = derive_operator_targets(operator_feedback)
 
     counts = get_recent_topic_counts(history)
-    target_nodes = find_underrepresented_nodes(topic_tree, counts)[:max_nodes]
+    target_nodes = find_underrepresented_nodes(
+        topic_tree,
+        counts,
+        operator_targets["boost_topics"],
+        operator_targets["avoid_topics"],
+    )[:max_nodes]
 
     new_items = []
     for node in target_nodes:
@@ -156,6 +182,7 @@ def run(max_nodes: int = 3):
                 "id": f"research_{node['id']}_{now_jst()[:10]}_{len(new_items)}",
                 "topic_node": node["id"],
                 "topic_name": node["name"],
+                "category_id": node["category_id"],
                 "category": node["category"],
                 "point": point.get("point", ""),
                 "detail": point.get("detail", ""),

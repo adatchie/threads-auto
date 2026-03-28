@@ -8,6 +8,7 @@ import random
 import requests
 from datetime import datetime, timedelta, timezone
 from utils import load_json, save_json, log_error, now_jst, is_kill_switch_on, STATE_DIR, KNOWLEDGE_DIR
+from feedback_state import get_active_feedback, derive_operator_targets
 
 logger = logging.getLogger("poster")
 
@@ -124,6 +125,10 @@ def should_post_now() -> bool:
     return now_hour in TIME_SLOTS
 
 
+def format_time_slots() -> str:
+    return ", ".join(f"{slot:02d}:00" for slot in TIME_SLOTS)
+
+
 
 def is_review_period_over(post_item: dict) -> bool:
     """review_until を過ぎているか確認（過ぎていたら投稿OK）"""
@@ -162,6 +167,18 @@ def run(dry_run: bool = False):
         return
 
     logger.info(f"Poster started (dry_run={dry_run})")
+
+    posting_feedback = get_active_feedback("posting")
+    posting_targets = derive_operator_targets(posting_feedback)
+    if posting_targets["pause_generation"]:
+        logger.info("Operator feedback requested a posting pause. Poster aborted.")
+        return
+
+    if not should_post_now():
+        logger.info(f"Outside posting slots ({format_time_slots()} JST).")
+        if not dry_run:
+            return
+        logger.info("[DRY RUN] Continuing simulation despite slot gate.")
 
     history = load_json(STATE_DIR / "post_history.json")
     queue = load_json(STATE_DIR / "post_queue.json")
@@ -237,6 +254,13 @@ def run(dry_run: bool = False):
                 except Exception as e:
                     log_error("poster", "Affiliate comment failed", str(e))
                     logger.warning(f"Affiliate comment failed: {e}")
+
+    if dry_run:
+        logger.info(
+            f"[DRY RUN] No state changes were made for {post_item['id']} "
+            f"(threads_id={threads_id}, affiliate_comment_id={affiliate_comment_id})"
+        )
+        return
 
     # 投稿履歴に追加
     history_item = {

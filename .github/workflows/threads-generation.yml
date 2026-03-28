@@ -1,11 +1,14 @@
-name: Threads Full Pipeline (manual)
+name: Threads Generation
 on:
-  workflow_dispatch:  # 手動実行のみ。定期実行は analysis / generation に分割済み
+  schedule:
+    # 毎日14:00 JST（= 05:00 UTC）
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # 手動実行も可能
 concurrency:
-  group: threads-full-pipeline
+  group: threads-generation
   cancel-in-progress: false
 jobs:
-  batch:
+  generate:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,12 +41,16 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run full pipeline
-        run: bash scripts/daily_run.sh
+      - name: Researcher
+        working-directory: agents
+        run: python researcher.py
+      - name: Writer (generate 3 posts - debug)
+        working-directory: agents
+        run: python writer.py --count 3
       - name: Commit state changes
         run: |
           git config user.name "threads-bot"
           git config user.email "threads-bot@users.noreply.github.com"
           git add state/
-          git diff --cached --quiet || git commit -m "chore: update state after full pipeline [skip ci]"
+          git diff --cached --quiet || git commit -m "chore: update state after generation [skip ci]"
           git push

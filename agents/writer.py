@@ -5,10 +5,18 @@ import os
 import json
 import logging
 import uuid
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from utils import load_json, save_json, log_error, now_jst, STATE_DIR, KNOWLEDGE_DIR
+from utils import load_json, save_json, log_error, now_jst, STATE_DIR, KNOWLEDGE_DIR, is_kill_switch_on
+from feedback_state import (
+    get_active_feedback,
+    summarize_operator_feedback,
+    derive_operator_targets,
+    topic_tokens,
+    pattern_tokens,
+)
 
 logger = logging.getLogger("writer")
 
@@ -58,12 +66,24 @@ def compute_similarity(new_text: str, history: list) -> float:
         return 0.0
 
 
-def select_pattern(patterns: list, recent_patterns: list, top_patterns: list) -> dict:
-    """パターンを選択: 直近3件と被らず、アナリスト推奨を優先"""
-    # 使えるパターンを絞り込み
-    available = [p for p in patterns if p["id"] not in recent_patterns]
-    if not available:
-        available = patterns  # 全部被ってたらリセット
+def select_pattern(patterns: list, recent_patterns: list, top_patterns: list, avoid_patterns: list | None = None, boost_patterns: list | None = None) -> dict:
+    """パターンを選択: 却下・直近重複を避けつつ、アナリスト推奨を優先"""
+    avoid_patterns = set(avoid_patterns or [])
+    boost_patterns = set(boost_patterns or [])
+    recent_patterns = set(recent_patterns)
+
+    available = [
+        p for p in patterns
+        if p["id"] not in recent_patterns and not (pattern_tokens(p) & avoid_patterns)
+    ]
+    boosted = [
+        p for p in patterns
+        if not (pattern_tokens(p) & avoid_patterns) and (pattern_tokens(p) & boost_patterns)
+    ]
+    if boosted:
+        available = [p for p in boosted if p["id"] not in recent_patterns] or boosted
+    elif not available:
+        available = [p for p in patterns if p["id"] not in recent_patterns] or [p for p in patterns if not (pattern_tokens(p) & avoid_patterns)] or patterns
 
     # アナリスト推奨パターンがあれば優先
     preferred = [p for p in available if p["id"] in top_patterns]
@@ -75,20 +95,93 @@ def select_pattern(patterns: list, recent_patterns: list, top_patterns: list) ->
     return random.choice(available)
 
 
-def select_topic_node(pool: list, recent_topics: list) -> dict | None:
+def select_topic_node(pool: list, recent_topics: list, avoid_topics: list | None = None, boost_topics: list | None = None) -> dict | None:
     """リサーチプールから未使用のネタを選ぶ（テーマ連続を避ける）"""
+    avoid_topics = set(avoid_topics or [])
+    boost_topics = set(boost_topics or [])
     unused = [item for item in pool if not item.get("used")]
     if not unused:
         return None
 
     # 直近テーマと被らないものを優先
-    non_repeat = [item for item in unused if item.get("topic_node") not in recent_topics]
-    candidates = non_repeat if non_repeat else unused
+    non_repeat = [
+        item for item in unused
+        if item.get("topic_node") not in recent_topics and not (topic_tokens(item) & avoid_topics)
+    ]
+    boosted = [
+        item for item in unused
+        if not (topic_tokens(item) & avoid_topics) and (topic_tokens(item) & boost_topics)
+    ]
+    if boosted:
+        candidates = [item for item in boosted if item.get("topic_node") not in recent_topics] or boosted
+    else:
+        if not non_repeat:
+            non_repeat = [item for item in unused if not (topic_tokens(item) & avoid_topics)]
+        candidates = non_repeat if non_repeat else unused
 
     # hook_potential: 高 > 中 > 低
     priority_map = {"高": 0, "中": 1, "低": 2}
     candidates.sort(key=lambda x: priority_map.get(x.get("hook_potential", "中"), 1))
     return candidates[0]
+
+
+def build_topic_lookup(topic_tree: dict) -> dict:
+    """topic_node からカテゴリID・カテゴリ名を逆引きできるようにする"""
+    node_to_category_id = {}
+    node_to_category_name = {}
+    for category in topic_tree.get("categories", []):
+        category_id = category.get("id", "")
+        category_name = category.get("name", "")
+        for node in category.get("nodes", []):
+            node_id = node.get("id", "")
+            if not node_id:
+                continue
+            node_to_category_id[node_id] = category_id
+            node_to_category_name[node_id] = category_name
+    return {
+        "node_to_category_id": node_to_category_id,
+        "node_to_category_name": node_to_category_name,
+    }
+
+
+def topic_matches_campaign(topic: dict, campaign: dict, topic_lookup: dict) -> bool:
+    """投稿テーマがアフィリエイトの発火条件に合致するかを判定する"""
+    trigger_topics = set(campaign.get("trigger_topics", []))
+    topic_node = topic.get("topic_node", "")
+    topic_category_id = topic.get("category_id") or topic_lookup["node_to_category_id"].get(topic_node, "")
+    topic_category_name = topic.get("category") or topic_lookup["node_to_category_name"].get(topic_node, "")
+
+    return (
+        topic_node in trigger_topics
+        or topic_category_id in trigger_topics
+        or topic_category_name in trigger_topics
+    )
+
+
+def summarize_review_feedback(review_feedback: list, limit: int = 5) -> str:
+    """直近の却下理由を短く要約してプロンプトに入れる"""
+    if not review_feedback:
+        return "なし"
+
+    recent = review_feedback[-limit:]
+    lines = []
+    for item in recent:
+        reason = item.get("reason", "").strip() or "manual_reject"
+        pattern = item.get("pattern", "unknown")
+        topic = item.get("topic_node", "unknown")
+        lines.append(f"- {pattern} / {topic}: {reason}")
+    return "\n".join(lines)
+
+
+def derive_feedback_avoid_lists(review_feedback: list) -> tuple[list[str], list[str]]:
+    """レビュー履歴から、一時的に避けるべきパターンとテーマを推定する"""
+    recent = review_feedback[-10:]
+    pattern_counts = Counter(item.get("pattern", "") for item in recent if item.get("pattern"))
+    topic_counts = Counter(item.get("topic_node", "") for item in recent if item.get("topic_node"))
+
+    avoid_patterns = [pattern for pattern, count in pattern_counts.items() if count >= 2]
+    avoid_topics = [topic for topic, count in topic_counts.items() if count >= 2]
+    return avoid_patterns, avoid_topics
 
 
 def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dict, hooks: list) -> str:
@@ -169,18 +262,56 @@ JSON形式で出力してください:
 
 def run(count: int = 10):
     logger.info(f"Writer started. Target: {count} posts")
+    if is_kill_switch_on():
+        logger.warning("KILL_SWITCH is enabled. Writer aborted.")
+        save_json(STATE_DIR / "writer_debug.json", {
+            "run_at": now_jst(),
+            "generated": 0,
+            "rejected": 0,
+            "aborted_by_kill_switch": True,
+            "debug_log": [],
+        })
+        return
+
     history = load_json(STATE_DIR / "post_history.json")
     queue = load_json(STATE_DIR / "post_queue.json")
     pool = load_json(STATE_DIR / "research_pool.json")
+    topic_tree = load_json(KNOWLEDGE_DIR / "topic_tree.json")
     patterns = load_json(KNOWLEDGE_DIR / "post_patterns.json")["patterns"]
     hooks = load_json(KNOWLEDGE_DIR / "hook_lines.json")["hooks"]
     account = load_json(KNOWLEDGE_DIR / "account.json")
     analyst_report = load_json(STATE_DIR / "analyst_report.json")
     affiliate = load_json(KNOWLEDGE_DIR / "affiliate.json")
+    review_feedback_path = STATE_DIR / "review_feedback.json"
+    review_feedback = load_json(review_feedback_path) if review_feedback_path.exists() else []
+    operator_feedback = get_active_feedback("writing")
+    operator_targets = derive_operator_targets(operator_feedback)
+    operator_feedback_summary = summarize_operator_feedback(operator_feedback)
+    topic_lookup = build_topic_lookup(topic_tree)
 
     recent_patterns = get_recent_used_patterns(history)
     recent_topics = get_recent_used_topics(history)
     top_patterns = analyst_report.get("top_patterns", [])
+    avoid_patterns = list(analyst_report.get("avoid_patterns", []))
+    review_avoid_patterns, review_avoid_topics = derive_feedback_avoid_lists(review_feedback)
+    avoid_patterns = list(dict.fromkeys(avoid_patterns + review_avoid_patterns))
+    review_feedback_summary = summarize_review_feedback(review_feedback)
+
+    if operator_targets["pause_generation"]:
+        logger.info("Operator feedback requested a pause. Writer skipped.")
+        save_json(STATE_DIR / "writer_debug.json", {
+            "run_at": now_jst(),
+            "generated": 0,
+            "rejected": 0,
+            "paused_by_operator_feedback": True,
+            "operator_feedback_count": len(operator_feedback),
+            "operator_feedback_summary": operator_feedback_summary,
+            "review_feedback_count": len(review_feedback),
+            "avoid_patterns_from_review": review_avoid_patterns,
+            "avoid_topics_from_review": review_avoid_topics,
+            "debug_log": [],
+        })
+        return
 
     generated = 0
     rejected = 0
@@ -190,29 +321,44 @@ def run(count: int = 10):
         if generated >= count:
             break
 
-        topic = select_topic_node(pool, recent_topics)
+        topic = select_topic_node(
+            pool,
+            recent_topics,
+            list(set(review_avoid_topics) | set(operator_targets["avoid_topics"])),
+            list(operator_targets["boost_topics"]),
+        )
         if not topic:
             logger.warning("Research pool exhausted")
             break
 
-        pattern = select_pattern(patterns, recent_patterns, top_patterns)
+        pattern = select_pattern(
+            patterns,
+            recent_patterns,
+            top_patterns,
+            list(set(avoid_patterns) | set(operator_targets["avoid_patterns"])),
+            list(operator_targets["boost_patterns"]),
+        )
 
         # アフィリエイト判定
         affiliate_campaigns = affiliate.get("campaigns", [])
         affiliate_campaign = None
         for camp in affiliate_campaigns:
-            if topic["topic_node"] in camp.get("trigger_topics", []):
-                # 本日のアフィ投稿数チェック
-                today = datetime.now(JST).strftime("%Y-%m-%d")
-                today_affiliate_count = sum(
-                    1 for p in history
-                    if p.get("has_affiliate") and p.get("timestamp", "").startswith(today)
-                )
-                max_aff = affiliate.get("rules", {}).get("max_affiliate_posts_per_day", 3)
-                if today_affiliate_count < max_aff:
-                    import random
-                    if random.random() < camp.get("frequency", 0.3):
-                        affiliate_campaign = camp
+            if not topic_matches_campaign(topic, camp, topic_lookup):
+                continue
+
+            # 本日のアフィ投稿数チェック
+            today = datetime.now(JST).strftime("%Y-%m-%d")
+            today_affiliate_count = sum(
+                1 for p in history
+                if p.get("has_affiliate") and p.get("timestamp", "").startswith(today)
+            )
+            max_aff = affiliate.get("rules", {}).get("max_affiliate_posts_per_day", 3)
+            if today_affiliate_count >= max_aff:
+                break
+
+            import random
+            if random.random() < camp.get("frequency", 0.3):
+                affiliate_campaign = camp
                 break
 
         # 投稿生成（最大MAX_RETRIESまで再生成）
@@ -220,7 +366,16 @@ def run(count: int = 10):
         score = 0.0
         for attempt in range(MAX_RETRIES + 1):
             try:
-                candidate = generate_post(pattern, topic, account, analyst_report, hooks)
+                prompt_analyst_report = dict(analyst_report)
+                prompt_analyst_report["feedback_text"] = (
+                    (analyst_report.get("feedback_text", "") or "").strip()
+                    + "\n\n【直近の却下フィードバック】\n"
+                    + review_feedback_summary
+                    + "\n\n【運用者フィードバック】\n"
+                    + operator_feedback_summary
+                ).strip()
+
+                candidate = generate_post(pattern, topic, account, prompt_analyst_report, hooks)
                 from llm import call_llm as _clm
                 debug_entry = {"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "content_len": len(candidate), "content_preview": candidate[:200], "backend": getattr(_clm, '_last_backend', 'unknown')}
                 debug_log.append(debug_entry)
@@ -265,6 +420,8 @@ def run(count: int = 10):
             "content": content,
             "pattern": pattern["id"],
             "topic_node": topic["topic_node"],
+            "category_id": topic.get("category_id") or topic_lookup["node_to_category_id"].get(topic["topic_node"], ""),
+            "category": topic.get("category") or topic_lookup["node_to_category_name"].get(topic["topic_node"], ""),
             "quality_score": round(score, 2),
             "has_affiliate": affiliate_campaign is not None,
             "affiliate_campaign_id": affiliate_campaign["id"] if affiliate_campaign else None,
@@ -274,6 +431,13 @@ def run(count: int = 10):
             "scheduled_slot": None,  # Posterが設定
         }
         queue.append(queue_item)
+
+        # 生成された投稿は Discord に流して手動レビューできるようにする
+        try:
+            from discord_notify import send_post_preview
+            send_post_preview(queue_item)
+        except Exception as e:
+            logger.warning(f"Discord preview notification failed: {e}")
 
         # ネタを使用済みにマーク
         for item in pool:
@@ -292,6 +456,16 @@ def run(count: int = 10):
         "run_at": now_jst(),
         "generated": generated,
         "rejected": rejected,
+        "review_feedback_count": len(review_feedback),
+        "operator_feedback_count": len(operator_feedback),
+        "operator_feedback_summary": operator_feedback_summary,
+        "paused_by_operator_feedback": False,
+        "avoid_patterns_from_review": review_avoid_patterns,
+        "avoid_topics_from_review": review_avoid_topics,
+        "avoid_patterns_from_operator": list(operator_targets["avoid_patterns"]),
+        "avoid_topics_from_operator": list(operator_targets["avoid_topics"]),
+        "boost_patterns_from_operator": list(operator_targets["boost_patterns"]),
+        "boost_topics_from_operator": list(operator_targets["boost_topics"]),
         "debug_log": debug_log,
     })
 
