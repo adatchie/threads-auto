@@ -153,6 +153,66 @@ def send_analysis_report(report: dict) -> bool:
     return delivered
 
 
+def send_buzz_insights_report(report: dict) -> bool:
+    generated_at = report.get("generated_at", "unknown")
+    source_count = report.get("source_count", 0)
+    insight_count = report.get("insight_count", len(report.get("insights", [])))
+    summary_text = _shorten(report.get("summary_text", "なし"), 600)
+    pattern_bias = ", ".join(report.get("pattern_bias", [])[:6]) or "なし"
+    topic_bias = ", ".join(report.get("topic_bias", [])[:6]) or "なし"
+    focus_nodes = report.get("focus_nodes", [])
+    focus_text = ", ".join(
+        str(node.get("topic_name") or node.get("topic_node") or "").strip()
+        for node in focus_nodes[:4]
+        if str(node.get("topic_name") or node.get("topic_node") or "").strip()
+    ) or "なし"
+
+    insight_lines = []
+    for idx, item in enumerate(report.get("insights", [])[:4], start=1):
+        title = _shorten(item.get("source_title", "unknown"), 120)
+        url = _shorten(item.get("source_url", ""), 180)
+        platform = str(item.get("platform", "x")).strip() or "x"
+        hook_type = str(item.get("hook_type") or item.get("recommended_pattern") or "unknown").strip()
+        recommended_topic = str(item.get("recommended_topic_node") or "unknown").strip()
+        mechanisms = item.get("mechanisms", [])
+        if isinstance(mechanisms, list):
+            mechanism_text = ", ".join(str(v).strip() for v in mechanisms if str(v).strip()) or "なし"
+        else:
+            mechanism_text = str(mechanisms).strip() or "なし"
+        adaptation = _shorten(item.get("adaptation_idea") or item.get("why_it_works") or "なし", 180)
+        excerpt = _shorten(item.get("source_excerpt", ""), 120)
+        insight_lines.append(
+            f"{idx}. [{platform}] `{hook_type}` → `{recommended_topic}`\n"
+            f"   {title}\n"
+            f"   mech: {mechanism_text}\n"
+            f"   idea: {adaptation}\n"
+            f"   ref: {excerpt}\n"
+            f"   url: {url}"
+        )
+
+    message = (
+        f"🧪 **バズ研究レポート**\n"
+        f"generated_at: `{generated_at}`\n"
+        f"- 取得候補: **{source_count}件**\n"
+        f"- 分析インサイト: **{insight_count}件**\n"
+        f"- 対象トピック: `{focus_text}`\n"
+        f"- パターン傾向: `{pattern_bias}`\n"
+        f"- テーマ傾向: `{topic_bias}`\n\n"
+        f"**要約**\n"
+        f"```\n{summary_text}\n```\n\n"
+        f"**拾った構造**\n"
+        + "\n\n".join(insight_lines)
+    )
+
+    delivered = _post_message(message)
+    _record_delivery(
+        "buzz_insights",
+        delivered,
+        f"{generated_at} | sources={source_count} | insights={insight_count} | {pattern_bias}",
+    )
+    return delivered
+
+
 def send_operator_feedback_notice(entry: dict) -> bool:
     scope = str(entry.get("scope", "overall")).strip() or "overall"
     mode = str(entry.get("mode", "note")).strip() or "note"
