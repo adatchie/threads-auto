@@ -3,11 +3,6 @@ on:
   schedule:
     # 毎朝11:00 JST（= 02:00 UTC）
     - cron: '0 2 * * *'
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'state/**'
   workflow_dispatch:  # 手動実行も可能
 concurrency:
   group: threads-analysis
