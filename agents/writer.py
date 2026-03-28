@@ -17,6 +17,7 @@ from feedback_state import (
     topic_tokens,
     pattern_tokens,
 )
+from buzz_state import load_buzz_report, summarize_buzz_report, derive_buzz_targets
 
 logger = logging.getLogger("writer")
 
@@ -28,6 +29,33 @@ MAX_SIMILARITY = 0.85
 RECENT_PATTERN_WINDOW = 3  # 直近N件で同パターン禁止
 RECENT_THEME_WINDOW = 3    # 直近N件で同テーマ連続禁止
 MAX_HISTORY_FOR_SIMILARITY = 100
+
+PATTERN_ALIASES = {
+    "before_after": "comparison",
+    "mistake_lesson": "warning",
+    "list_3": "list",
+    "tip_deep": "tree_expansion",
+    "question_answer": "comment_inducing",
+    "demand_check": "demand_check",
+}
+
+HOOK_TYPE_GROUPS = {
+    "assertion_short": {"assertion_short", "rebuttal", "empathy"},
+    "comment_inducing": {"comment_inducing", "demand_check"},
+    "tree_expansion": {"tree_expansion", "buzz_pivot", "expose"},
+    "expose": {"expose", "rebuttal"},
+    "demand_check": {"demand_check", "comment_inducing"},
+    "list": {"list", "data_citation"},
+    "experience": {"experience", "timeline"},
+    "data_citation": {"data_citation", "list"},
+    "rebuttal": {"rebuttal", "assertion_short"},
+    "empathy": {"empathy", "assertion_short"},
+    "warning": {"warning", "rebuttal"},
+    "comparison": {"comparison", "rebuttal"},
+    "timeline": {"timeline", "experience"},
+    "buzz_pivot": {"buzz_pivot", "comment_inducing", "tree_expansion", "expose"},
+    "affiliate_lead": {"affiliate_lead", "expose", "comment_inducing"},
+}
 
 SCORE_DIMENSIONS = [
     "フックの強さ（1行目でスクロールを止めるか）",
@@ -41,6 +69,55 @@ SCORE_DIMENSIONS = [
     "差別化（過去の投稿と被っていないか）",
     "Threads最適化（Threadsユーザーの雰囲気に合っているか）",
 ]
+
+
+def normalize_pattern_id(pattern_id: str) -> str:
+    return PATTERN_ALIASES.get(str(pattern_id).strip(), str(pattern_id).strip())
+
+
+def normalize_pattern_list(values: list[str]) -> list[str]:
+    items: list[str] = []
+    for value in values:
+        normalized = normalize_pattern_id(value)
+        if normalized and normalized not in items:
+            items.append(normalized)
+    return items
+
+
+def select_hook_examples(hooks: list, pattern_id: str, buzz_patterns: set[str] | None = None, limit: int = 5) -> list[dict]:
+    """現在のパターンと外部バズ傾向に合うフック例を優先して返す"""
+    buzz_patterns = set(buzz_patterns or [])
+    normalized_pattern = normalize_pattern_id(pattern_id)
+    desired_types = set(HOOK_TYPE_GROUPS.get(normalized_pattern, {normalized_pattern}))
+    for buzz_pattern in buzz_patterns:
+        desired_types.update(HOOK_TYPE_GROUPS.get(normalize_pattern_id(buzz_pattern), {normalize_pattern_id(buzz_pattern)}))
+
+    prioritized = [hook for hook in hooks if hook.get("type") in desired_types]
+    if not prioritized:
+        prioritized = hooks[:]
+
+    unique: list[dict] = []
+    seen_examples: set[str] = set()
+    for hook in prioritized:
+        example = str(hook.get("example", "")).strip()
+        if not example or example in seen_examples:
+            continue
+        unique.append(hook)
+        seen_examples.add(example)
+        if len(unique) >= limit:
+            break
+
+    if len(unique) < limit:
+        for hook in hooks:
+            example = str(hook.get("example", "")).strip()
+            if not example or example in seen_examples:
+                continue
+            unique.append(hook)
+            seen_examples.add(example)
+            if len(unique) >= limit:
+                break
+
+    return unique[:limit]
 
 
 def get_recent_used_patterns(history: list) -> list:
@@ -68,9 +145,10 @@ def compute_similarity(new_text: str, history: list) -> float:
 
 def select_pattern(patterns: list, recent_patterns: list, top_patterns: list, avoid_patterns: list | None = None, boost_patterns: list | None = None) -> dict:
     """パターンを選択: 却下・直近重複を避けつつ、アナリスト推奨を優先"""
-    avoid_patterns = set(avoid_patterns or [])
-    boost_patterns = set(boost_patterns or [])
+    avoid_patterns = set(normalize_pattern_list(list(avoid_patterns or [])))
+    boost_patterns = set(normalize_pattern_list(list(boost_patterns or [])))
     recent_patterns = set(recent_patterns)
+    top_patterns = set(normalize_pattern_list(list(top_patterns or [])))
 
     available = [
         p for p in patterns
@@ -121,7 +199,13 @@ def select_topic_node(pool: list, recent_topics: list, avoid_topics: list | None
 
     # hook_potential: 高 > 中 > 低
     priority_map = {"高": 0, "中": 1, "低": 2}
-    candidates.sort(key=lambda x: priority_map.get(x.get("hook_potential", "中"), 1))
+    source_priority = {"buzz_research": 0, "topic_research": 1}
+    candidates.sort(
+        key=lambda x: (
+            source_priority.get(x.get("source_type", ""), 2),
+            priority_map.get(x.get("hook_potential", "中"), 1),
+        )
+    )
     return candidates[0]
 
 
@@ -184,12 +268,16 @@ def derive_feedback_avoid_lists(review_feedback: list) -> tuple[list[str], list[
     return avoid_patterns, avoid_topics
 
 
-def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dict, hooks: list) -> str:
+def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dict, hooks: list, buzz_report: dict | None = None) -> str:
     """LLMで投稿を生成"""
     from llm import call_llm
 
-    hook_examples = "\n".join([f'- {h["example"]}' for h in hooks[:5]])
+    buzz_report = buzz_report or {}
+    buzz_targets = derive_buzz_targets(buzz_report)
+    selected_hooks = select_hook_examples(hooks, pattern.get("id", ""), buzz_targets["boost_patterns"], limit=5)
+    hook_examples = "\n".join([f'- {h["example"]}' for h in selected_hooks])
     feedback = analyst_report.get("feedback_text", "")
+    buzz_context = summarize_buzz_report(buzz_report, topic, limit=3)
 
     prompt = f"""あなたはThreadsの転職系インフルエンサーとして投稿を書くライターです。
 
@@ -212,6 +300,9 @@ def generate_post(pattern: dict, topic: dict, account: dict, analyst_report: dic
 
 【アナリストからのフィードバック】
 {feedback}
+
+【バズ研究メモ】
+{buzz_context}
 
 【ルール】
 - 500文字以内
@@ -281,6 +372,7 @@ def run(count: int = 10):
     hooks = load_json(KNOWLEDGE_DIR / "hook_lines.json")["hooks"]
     account = load_json(KNOWLEDGE_DIR / "account.json")
     analyst_report = load_json(STATE_DIR / "analyst_report.json")
+    buzz_report = load_buzz_report()
     affiliate = load_json(KNOWLEDGE_DIR / "affiliate.json")
     review_feedback_path = STATE_DIR / "review_feedback.json"
     review_feedback = load_json(review_feedback_path) if review_feedback_path.exists() else []
@@ -288,14 +380,18 @@ def run(count: int = 10):
     operator_targets = derive_operator_targets(operator_feedback)
     operator_feedback_summary = summarize_operator_feedback(operator_feedback)
     topic_lookup = build_topic_lookup(topic_tree)
+    buzz_targets = derive_buzz_targets(buzz_report)
 
     recent_patterns = get_recent_used_patterns(history)
     recent_topics = get_recent_used_topics(history)
-    top_patterns = analyst_report.get("top_patterns", [])
-    avoid_patterns = list(analyst_report.get("avoid_patterns", []))
+    top_patterns = normalize_pattern_list(analyst_report.get("top_patterns", []))
+    avoid_patterns = normalize_pattern_list(analyst_report.get("avoid_patterns", []))
     review_avoid_patterns, review_avoid_topics = derive_feedback_avoid_lists(review_feedback)
     avoid_patterns = list(dict.fromkeys(avoid_patterns + review_avoid_patterns))
     review_feedback_summary = summarize_review_feedback(review_feedback)
+    buzz_summary = summarize_buzz_report(buzz_report)
+    buzz_boost_patterns = set(normalize_pattern_list(list(buzz_targets["boost_patterns"])))
+    buzz_boost_topics = set(buzz_targets["boost_topics"])
 
     if operator_targets["pause_generation"]:
         logger.info("Operator feedback requested a pause. Writer skipped.")
@@ -309,6 +405,8 @@ def run(count: int = 10):
             "review_feedback_count": len(review_feedback),
             "avoid_patterns_from_review": review_avoid_patterns,
             "avoid_topics_from_review": review_avoid_topics,
+            "buzz_research_count": len(buzz_report.get("insights", [])) if isinstance(buzz_report, dict) else 0,
+            "buzz_summary": buzz_summary,
             "debug_log": [],
         })
         return
@@ -325,7 +423,7 @@ def run(count: int = 10):
             pool,
             recent_topics,
             list(set(review_avoid_topics) | set(operator_targets["avoid_topics"])),
-            list(operator_targets["boost_topics"]),
+            list(set(operator_targets["boost_topics"]) | buzz_boost_topics),
         )
         if not topic:
             logger.warning("Research pool exhausted")
@@ -336,7 +434,7 @@ def run(count: int = 10):
             recent_patterns,
             top_patterns,
             list(set(avoid_patterns) | set(operator_targets["avoid_patterns"])),
-            list(operator_targets["boost_patterns"]),
+            list(set(operator_targets["boost_patterns"]) | buzz_boost_patterns),
         )
 
         # アフィリエイト判定
@@ -375,9 +473,17 @@ def run(count: int = 10):
                     + operator_feedback_summary
                 ).strip()
 
-                candidate = generate_post(pattern, topic, account, prompt_analyst_report, hooks)
+                candidate = generate_post(pattern, topic, account, prompt_analyst_report, hooks, buzz_report)
                 from llm import call_llm as _clm
-                debug_entry = {"topic": topic["topic_node"], "pattern": pattern["id"], "attempt": attempt+1, "content_len": len(candidate), "content_preview": candidate[:200], "backend": getattr(_clm, '_last_backend', 'unknown')}
+                debug_entry = {
+                    "topic": topic["topic_node"],
+                    "pattern": pattern["id"],
+                    "attempt": attempt+1,
+                    "content_len": len(candidate),
+                    "content_preview": candidate[:200],
+                    "backend": getattr(_clm, '_last_backend', 'unknown'),
+                    "buzz_research_count": len(buzz_report.get("insights", [])) if isinstance(buzz_report, dict) else 0,
+                }
                 debug_log.append(debug_entry)
                 logger.info(f"  Generated content length: {len(candidate)} chars, first 50: {repr(candidate[:50])}")
                 if not candidate or len(candidate.strip()) < 20:
@@ -466,6 +572,10 @@ def run(count: int = 10):
         "avoid_topics_from_operator": list(operator_targets["avoid_topics"]),
         "boost_patterns_from_operator": list(operator_targets["boost_patterns"]),
         "boost_topics_from_operator": list(operator_targets["boost_topics"]),
+        "buzz_research_count": len(buzz_report.get("insights", [])) if isinstance(buzz_report, dict) else 0,
+        "buzz_summary": buzz_summary,
+        "buzz_boost_patterns": list(buzz_boost_patterns),
+        "buzz_boost_topics": list(buzz_boost_topics),
         "debug_log": debug_log,
     })
 
