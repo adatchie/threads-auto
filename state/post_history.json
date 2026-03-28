@@ -16,6 +16,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:26.223427+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828056+09:00"
     }
   },
   {
@@ -35,6 +40,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:26.500449+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828077+09:00"
     }
   },
   {
@@ -54,6 +64,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:27.096752+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828090+09:00"
     }
   },
   {
@@ -73,6 +88,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:27.365920+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828099+09:00"
     }
   },
   {
@@ -92,6 +112,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:27.624847+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828105+09:00"
     }
   },
   {
@@ -111,6 +136,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:27.882586+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828111+09:00"
     }
   },
   {
@@ -130,6 +160,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:28.124939+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828116+09:00"
     }
   },
   {
@@ -149,6 +184,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:28.409534+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828128+09:00"
     }
   },
   {
@@ -168,6 +208,11 @@
       "reposts": 0,
       "quotes": 0,
       "fetched_at": "2026-03-25T09:22:28.683995+09:00"
+    },
+    "reply_insights": {
+      "sample_replies": [],
+      "note": "fetch_skipped_too_old",
+      "fetched_at": "2026-03-28T21:41:59.828135+09:00"
     }
   }
 ]
